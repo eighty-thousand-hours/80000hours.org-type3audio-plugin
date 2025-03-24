@@ -22,7 +22,69 @@ add_action('enqueue_block_editor_assets', function () {
     const { updateBlockAttributes } = wp.data.dispatch('core/block-editor');
     const { addFilter } = wp.hooks;
     const { createElement } = wp.element;
+    const { registerBlockType } = wp.blocks;
+    const { RichText } = wp.blockEditor;
 
+
+    // Register a new Audio Note block type
+    registerBlockType('t3a/audio-note', {
+        title: 'Audio Note',
+        description: 'A block for content that will only be visible in the editor and used for audio narration notes.',
+        icon: 'playlist-audio',
+        category: 'common',
+        
+        attributes: {
+            content: {
+                type: 'string',
+                source: 'html',
+                selector: 'p',
+                default: '',
+            },
+            // This block will always have audioNote set to true
+            audioNote: {
+                type: 'boolean',
+                default: true,
+            }
+        },
+        
+        // Define how the block appears in the editor
+        edit: function(props) {
+            const { attributes, setAttributes, className } = props;
+            
+            return createElement(
+                'div',
+                { 
+                    className: className,
+                    'data-audio-note': 'true'
+                },
+                createElement(
+                    RichText,
+                    {
+                        tagName: 'p',
+                        value: attributes.content,
+                        onChange: function(content) {
+                            setAttributes({ content: content });
+                        },
+                        placeholder: 'Enter your audio note here...'
+                    }
+                )
+            );
+        },
+        
+        // Define how the block is saved
+        save: function(props) {
+            const { attributes } = props;
+            
+            return createElement(
+                RichText.Content,
+                {
+                    tagName: 'p',
+                    value: attributes.content,
+                }
+            );
+        }
+    });
+    
     // Register support for both attributes for all blocks
     addFilter(
         'blocks.registerBlockType',
@@ -201,6 +263,8 @@ add_action('enqueue_block_editor_assets', function () {
             );
         }
     );
+    
+ 
 } )();
 JS;
 
@@ -261,7 +325,7 @@ div[data-do-not-narrate="true"]::after {
 /* Audio Note Block Styles */
 .wp-block[data-audio-note="true"],
 .block-editor-block-list__block[data-audio-note="true"],
-div[data-audio-note="true"] {
+div[data-type="t3a/audio-note"] {
     position: relative !important;
     outline: none !important;
     padding: 8px !important;
@@ -271,7 +335,7 @@ div[data-audio-note="true"] {
 
 .wp-block[data-audio-note="true"]::before,
 .block-editor-block-list__block[data-audio-note="true"]::before,
-div[data-audio-note="true"]::before {
+div[data-type="t3a/audio-note"]::before {
     content: "📝 Audio note" !important;
     display: block !important;
     position: absolute !important;
@@ -287,7 +351,7 @@ div[data-audio-note="true"]::before {
 
 .wp-block[data-audio-note="true"]::after,
 .block-editor-block-list__block[data-audio-note="true"]::after,
-div[data-audio-note="true"]::after {
+div[data-type="t3a/audio-note"]::after {
     content: "" !important;
     position: absolute !important;
     top: 0 !important;
@@ -318,6 +382,12 @@ CSS;
  * On the front end, wrap blocks in appropriate divs based on their attributes
  */
 add_filter('render_block', function($block_content, $block) {
+    // Always wrap our custom audio note block in the audio note class
+    if ($block['blockName'] === 't3a/audio-note') {
+        return '<div class="t3a-audio-note">' . $block_content . '</div>';
+    }
+    
+    // Handle regular blocks with our attributes
     if (!empty($block['attrs']['doNotNarrate'])) {
         return '<div class="t3a-do-not-narrate">' . $block_content . '</div>';
     }

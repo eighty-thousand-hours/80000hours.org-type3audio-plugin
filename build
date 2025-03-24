@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# Exclude .git directory and create zip of all other files
+zip -r type-3-audio.zip . -x "*.git/*"

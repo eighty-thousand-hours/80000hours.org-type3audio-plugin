@@ -107,21 +107,33 @@ add_action('enqueue_block_editor_assets', function () {
         return allowedBlockTypes.includes(blockName);
     };
 
+    // Function to check if block type can have must narrate button
+    const isMustNarrateAllowedBlockType = (blockName) => {
+        const allowedBlockTypes = [
+            'core/image',
+            'core/details'
+        ];
+        return allowedBlockTypes.includes(blockName);
+    };
+
     // Create a higher-order component that adds our custom toolbar
     const withT3AToolbar = createHigherOrderComponent((BlockEdit) => {
         return (props) => {
-            // Only add toolbar for allowed block types
-            if (!isAllowedBlockType(props.name)) {
-                return createElement(BlockEdit, props);
-            }
-            
-            const { attributes, setAttributes, clientId } = props;
+            const { attributes, setAttributes, clientId, name } = props;
             const isDoNotNarrateActive = attributes?.doNotNarrate || false;
+            const isMustNarrateActive = attributes?.mustNarrate || false;
             
             const toggleDoNotNarrate = () => {
                 const currentValue = attributes?.doNotNarrate || false;
                 setAttributes({
                     doNotNarrate: !currentValue
+                });
+            };
+
+            const toggleMustNarrate = () => {
+                const currentValue = attributes?.mustNarrate || false;
+                setAttributes({
+                    mustNarrate: !currentValue
                 });
             };
             
@@ -135,13 +147,24 @@ add_action('enqueue_block_editor_assets', function () {
                 createElement(
                     BlockControls,
                     { group: 'block' },
-                    createElement(
+                    // Only show do not narrate button for allowed block types
+                    isAllowedBlockType(name) && createElement(
                         ToolbarButton,
                         {
                             icon: 'microphone',
                             title: 'Do not narrate',
                             onClick: toggleDoNotNarrate,
                             isActive: isDoNotNarrateActive
+                        }
+                    ),
+                    // Only show must narrate button for allowed block types
+                    isMustNarrateAllowedBlockType(name) && createElement(
+                        ToolbarButton,
+                        {
+                            icon: 'megaphone',
+                            title: 'Must narrate',
+                            onClick: toggleMustNarrate,
+                            isActive: isMustNarrateActive
                         }
                     )
                 )
@@ -164,6 +187,10 @@ add_action('enqueue_block_editor_assets', function () {
             settings.attributes = {
                 ...settings.attributes,
                 doNotNarrate: {
+                    type: 'boolean',
+                    default: false,
+                },
+                mustNarrate: {
                     type: 'boolean',
                     default: false,
                 }
@@ -189,6 +216,9 @@ add_action('enqueue_block_editor_assets', function () {
             if ( attributes?.doNotNarrate ) {
                 props['data-do-not-narrate'] = 'true';
             }
+            if ( attributes?.mustNarrate ) {
+                props['data-must-narrate'] = 'true';
+            }
             return props;
         }
     );
@@ -204,6 +234,9 @@ add_action('enqueue_block_editor_assets', function () {
                 
                 if ( attributes?.doNotNarrate ) {
                     wrapperProps['data-do-not-narrate'] = 'true';
+                }
+                if ( attributes?.mustNarrate ) {
+                    wrapperProps['data-must-narrate'] = 'true';
                 }
                 
                 return createElement( BlockListBlock, { ...props, wrapperProps } );
@@ -319,6 +352,48 @@ div[data-type="t3a/audio-note"]::after {
     position: relative !important;
     z-index: 2 !important;
 }
+
+/* Must Narrate Styles */
+.wp-block[data-must-narrate="true"],
+.block-editor-block-list__block[data-must-narrate="true"],
+div[data-must-narrate="true"] {
+    position: relative !important;
+    outline: none !important;
+    padding: 8px !important;
+    background-color: rgba(0, 128, 0, 0.03) !important;
+    border-radius: 4px !important;
+}
+
+.wp-block[data-must-narrate="true"]::before,
+.block-editor-block-list__block[data-must-narrate="true"]::before,
+div[data-must-narrate="true"]::before {
+    content: "🔊 Must narrate" !important;
+    display: block !important;
+    position: absolute !important;
+    top: -20px !important;
+    right: 0 !important;
+    background-color: #008000 !important;
+    color: white !important;
+    padding: 2px 8px !important;
+    font-size: 11px !important;
+    border-radius: 3px !important;
+    z-index: 99999 !important;
+}
+
+.wp-block[data-must-narrate="true"]::after,
+.block-editor-block-list__block[data-must-narrate="true"]::after,
+div[data-must-narrate="true"]::after {
+    content: "" !important;
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    border: 2px dashed #008000 !important;
+    border-radius: 4px !important;
+    pointer-events: none !important;
+    z-index: 1 !important;
+}
 CSS;
     wp_register_style('t3a-do-not-narrate-editor-css', false);
     wp_enqueue_style('t3a-do-not-narrate-editor-css');
@@ -337,6 +412,9 @@ add_filter('render_block', function($block_content, $block) {
     // Handle regular blocks with our attributes
     if (!empty($block['attrs']['doNotNarrate'])) {
         return '<div class="t3a-do-not-narrate">' . $block_content . '</div>';
+    }
+    if (!empty($block['attrs']['mustNarrate'])) {
+        return '<div class="t3a-must-narrate">' . $block_content . '</div>';
     }
     if (!empty($block['attrs']['audioNote'])) {
         return '<div class="t3a-audio-note">' . $block_content . '</div>';

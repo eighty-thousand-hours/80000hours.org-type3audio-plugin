@@ -26,12 +26,56 @@ add_action('enqueue_block_editor_assets', function () {
     const { RichText } = wp.blockEditor;
     const { createHigherOrderComponent } = wp.compose;
 
+    // Define the custom SVG icon for do not narrate
+    const DoNotNarrateIcon = () => createElement(
+        'svg',
+        {
+            xmlns: 'http://www.w3.org/2000/svg',
+            viewBox: '0 0 100 100',
+            width: '24',
+            height: '24',
+            fill: 'currentColor'
+        },
+        createElement('path', {
+            d: 'M83.1,67.3l5.6,5.6c12.3-14.4,11.7-36.1-2-49.7c-1.5-1.5-4.1-1.5-5.6,0c-1.5,1.5-1.5,4.1,0,5.7C91.7,39.3,92.3,56,83.1,67.3z'
+        }),
+        createElement('path', {
+            d: 'M72.2,56.4l5.7,5.7c6.4-8.4,5.8-20.5-1.9-28.1c-1.5-1.5-4.1-1.5-5.6,0c-1.5,1.5-1.5,4.1,0,5.6C74.9,44.1,75.6,51.1,72.2,56.4z'
+        }),
+        createElement('path', {
+            d: 'M52.8,22c0.2-0.1,0.3-0.2,0.5-0.2c0.1,0,0.2,0,0.4,0.1c0.3,0.1,0.4,0.4,0.4,0.7v15.6l8.1,8.1V22.7c0-3.4-1.8-6.4-4.8-8c-3-1.5-6.5-1.3-9.3,0.6l-10,7l5.9,5.9L52.8,22z'
+        }),
+        createElement('path', {
+            d: 'M14.3,9.3c-1.6-1.6-4.2-1.6-5.8,0s-1.6,4.2,0,5.8l15.1,15.1H11.4c-4.9,0-8.9,4-8.9,8.9V59c0,4.9,4,8.9,8.9,8.9H27l21.2,14.9c1.5,1.1,3.4,1.6,5.2,1.6c1.4,0,2.8-0.4,4.1-1c3-1.5,4.8-4.6,4.8-7.9v-6.8l21.9,21.9c0.8,0.8,1.8,1.2,2.9,1.2c1,0,2.1-0.4,2.9-1.2c1.6-1.6,1.6-4.2,0-5.8L14.3,9.3zM24.2,59.8H11.4c-0.4,0-0.8-0.4-0.8-0.8V39.2c0-0.4,0.4-0.8,0.8-0.8h12.7V59.8zM54.1,75.5c0,0.3-0.2,0.6-0.4,0.7c-0.3,0.2-0.6,0.2-0.9,0L32.3,61.8V38.8l21.8,21.8V75.5z'
+        })
+    );
+
+    // Define allowed block types in one place
+    const ALLOWED_BLOCK_TYPES = [
+        'core/paragraph',
+        'core/heading',
+        'core/list',
+        'core/quote',
+        'core/code',
+        'core/preformatted',
+        'core/pullquote',
+        'core/table',
+        'core/verse',
+        'core/freeform', // Classic block
+        'core/media-text',
+        'core/group'
+    ];
+
+    const MUST_NARRATE_BLOCK_TYPES = [
+        'core/image',
+        'core/details'
+    ];
 
     // Register a new Audio Note block type
     registerBlockType('t3a/audio-note', {
         title: 'Audio Note',
         description: 'A block for content that will only be visible in the editor and used for audio narration notes.',
-        icon: 'playlist-audio',
+        icon: 'microphone',
         category: 'common',
         
         attributes: {
@@ -86,117 +130,63 @@ add_action('enqueue_block_editor_assets', function () {
         }
     });
 
-    // Register a new Type 3 Player block type
     registerBlockType('t3a/player', {
         title: 'TYPE III AUDIO Player',
         description: 'A block that inserts the TYPE III AUDIO player.',
         icon: 'controls-volumeon',
         category: 'common',
         
-        attributes: {
-            playerAttributes: {
-                type: 'string',
-                default: ''
-            }
-        },
-        
         // Define how the block appears in the editor
-        edit: function(props) {
-            const { attributes, setAttributes } = props;
-            
+        edit: function() {
             return createElement(
-                Fragment,
-                null,
-                createElement(
-                    InspectorControls,
-                    null,
-                    createElement(
-                        'div',
-                        { className: 't3a-player-inspector' },
-                        createElement(
-                            TextControl,
-                            {
-                                label: 'Player Attributes',
-                                help: 'Enter attributes like: mp3-url="example.mp3" sticky="true"',
-                                value: attributes.playerAttributes,
-                                onChange: (value) => setAttributes({ playerAttributes: value })
-                            }
-                        )
-                    )
-                ),
+                'div',
+                { 
+                    className: 't3a-player-block',
+                    'data-t3a-player': 'true'
+                },
                 createElement(
                     'div',
-                    { 
-                        className: 't3a-player-block',
-                        'data-t3a-player': 'true'
+                    {
+                        style: {
+                            padding: '0px',
+                            height: '50px',
+                            background: '#f0f0f0',
+                            borderRadius: '4px',
+                            border: '1px dashed #ccc'
+                        }
                     },
                     createElement(
-                        'div',
+                        'audio',
                         {
+                            controls: true,
                             style: {
-                                padding: '0px',
-                                height: '50px',
-                                background: '#f0f0f0',
-                                borderRadius: '4px',
-                                border: '1px dashed #ccc'
+                                width: '100%',
+                                opacity: '0.5'
                             }
-                        },
-                        createElement(
-                            'audio',
-                            {
-                                controls: true,
-                                style: {
-                                    width: '100%',
-                                    opacity: '0.5'
-                                }
-                            }
-                        )
+                        }
                     )
                 )
             );
         },
         
         // Define how the block is saved
-        save: function(props) {
-            const { attributes } = props;
-            const shortcode = '[type_3_player' + (attributes.playerAttributes ? ' ' + attributes.playerAttributes : '') + ']';
-            
+        save: function() {
             return createElement(
                 'div',
                 null,
-                shortcode
+                '[type_3_player]'
             );
         }
     });
     
     // Function to check if the block type is allowed to have our buttons
     const isAllowedBlockType = (blockName) => {
-        const allowedBlockTypes = [
-            'core/paragraph',
-            'core/heading',
-            'core/list',
-            'core/quote',
-            'core/code',
-            'core/details',
-            'core/preformatted',
-            'core/pullquote',
-            'core/table',
-            'core/verse',
-            'core/freeform', // Classic block
-            'core/media-text',
-            'core/group'
-        ];
-        
-        return allowedBlockTypes.includes(blockName);
+        return ALLOWED_BLOCK_TYPES.includes(blockName);
     };
 
     // Function to check if block type can have must narrate button
     const isMustNarrateAllowedBlockType = (blockName) => {
-        const allowedBlockTypes = [
-            'core/image',
-            'core/details'
-        ];
-        return allowedBlockTypes.includes(blockName);
+        return MUST_NARRATE_BLOCK_TYPES.includes(blockName);
     };
 
     // Create a higher-order component that adds our custom toolbar
@@ -234,7 +224,7 @@ add_action('enqueue_block_editor_assets', function () {
                     isAllowedBlockType(name) && createElement(
                         ToolbarButton,
                         {
-                            icon: 'microphone',
+                            icon: DoNotNarrateIcon,
                             title: 'Do not narrate',
                             onClick: toggleDoNotNarrate,
                             isActive: isDoNotNarrateActive
@@ -244,7 +234,7 @@ add_action('enqueue_block_editor_assets', function () {
                     isMustNarrateAllowedBlockType(name) && createElement(
                         ToolbarButton,
                         {
-                            icon: 'megaphone',
+                            icon: 'microphone',
                             title: 'Must narrate',
                             onClick: toggleMustNarrate,
                             isActive: isMustNarrateActive
@@ -267,17 +257,20 @@ add_action('enqueue_block_editor_assets', function () {
         'blocks.registerBlockType',
         't3a/attributes',
         ( settings, name ) => {
-            settings.attributes = {
-                ...settings.attributes,
-                doNotNarrate: {
-                    type: 'boolean',
-                    default: false,
-                },
-                mustNarrate: {
-                    type: 'boolean',
-                    default: false,
-                }
-            };
+            // Only add our attributes to specific block types
+            if (ALLOWED_BLOCK_TYPES.includes(name) || MUST_NARRATE_BLOCK_TYPES.includes(name)) {
+                settings.attributes = {
+                    ...settings.attributes,
+                    doNotNarrate: {
+                        type: 'boolean',
+                        default: false,
+                    },
+                    mustNarrate: {
+                        type: 'boolean',
+                        default: false,
+                    }
+                };
+            }
             return settings;
         }
     );

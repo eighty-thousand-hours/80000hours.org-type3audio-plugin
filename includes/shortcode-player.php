@@ -13,6 +13,20 @@ function t3a_enqueue_scripts() {
 
 add_action('wp_enqueue_scripts', 't3a_enqueue_scripts');
 
+function t3a_register_header_play_buttons_css() {
+    $header_play_buttons = get_option("type_iii_audio_header_play_buttons", "0");
+    $header_play_buttons_css = get_option("type_iii_audio_header_play_buttons_css", "");
+    
+    if ($header_play_buttons === "1" && !empty($header_play_buttons_css)) {
+        wp_register_style(
+            'type-3-header-play-buttons',
+            false // No external file
+        );
+        wp_enqueue_style('type-3-header-play-buttons');
+        wp_add_inline_style('type-3-header-play-buttons', $header_play_buttons_css);
+    }
+}
+
 function type_3_player($atts) {
     $attributes = '';
 
@@ -26,6 +40,7 @@ function type_3_player($atts) {
     $header_play_buttons = get_option("type_iii_audio_header_play_buttons", "0");
     if ($header_play_buttons === "1") {
         $attributes .= 'header-play-buttons="true" ';
+        t3a_register_header_play_buttons_css();
     }
 
     $atts = shortcode_atts($default_atts, $atts);

@@ -13,6 +13,19 @@ function t3a_enqueue_scripts() {
 
 add_action('wp_enqueue_scripts', 't3a_enqueue_scripts');
 
+function t3a_register_custom_css() {
+    $custom_css = get_option("type_iii_audio_custom_css", "");
+    
+    if (!empty($custom_css)) {
+        wp_register_style(
+            'type-3-custom-css',
+            false // No external file
+        );
+        wp_enqueue_style('type-3-custom-css');
+        wp_add_inline_style('type-3-custom-css', $custom_css);
+    }
+}
+
 function t3a_register_header_play_buttons_css() {
     $header_play_buttons = get_option("type_iii_audio_header_play_buttons", "0");
     $header_play_buttons_css = get_option("type_iii_audio_header_play_buttons_css", "");
@@ -42,6 +55,15 @@ function type_3_player($atts) {
         $attributes .= 'header-play-buttons="true" ';
         t3a_register_header_play_buttons_css();
     }
+
+    // Check if floating player is enabled
+    $floating_player = get_option("type_iii_audio_floating_player", "0");
+    if ($floating_player === "1") {
+        $attributes .= 'sticky="true" ';
+    }
+
+    // Always register and enqueue custom CSS
+    t3a_register_custom_css();
 
     $atts = shortcode_atts($default_atts, $atts);
 

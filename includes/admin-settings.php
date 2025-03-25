@@ -31,7 +31,8 @@ function type_iii_audio_options() {
         update_option("type_iii_audio_auth_key", $_POST["auth_key"]);
         update_option("type_iii_audio_preview_mode", isset($_POST["preview_mode"]) ? "1" : "0");
         update_option("type_iii_audio_header_play_buttons", isset($_POST["header_play_buttons"]) ? "1" : "0");
-        update_option("type_iii_audio_header_play_buttons_css", $_POST["header_play_buttons_css"]);
+        update_option("type_iii_audio_floating_player", isset($_POST["floating_player"]) ? "1" : "0");
+        update_option("type_iii_audio_custom_css", $_POST["custom_css"]);
         ?>
         <div class="updated"><p><strong><?php _e("Settings saved."); ?></strong></p></div>
         <?php
@@ -39,7 +40,8 @@ function type_iii_audio_options() {
     $auth_key = get_option("type_iii_audio_auth_key");
     $preview_mode = get_option("type_iii_audio_preview_mode", "0");
     $header_play_buttons = get_option("type_iii_audio_header_play_buttons", "0");
-    $header_play_buttons_css = get_option("type_iii_audio_header_play_buttons_css", "
+    $floating_player = get_option("type_iii_audio_floating_player", "0");
+    $custom_css = get_option("type_iii_audio_custom_css", "
 /* Heading play button should not be shown on small screens */
 .t3a-heading-play-button {
   display: none;
@@ -141,14 +143,25 @@ function type_iii_audio_options() {
                             </p>
                         </td>
                     </tr>
-                    <tr class="header-play-buttons-css-row" style="display: <?php echo $header_play_buttons === "1" ? "table-row" : "none"; ?>">
+                    <tr>
                         <th scope="row">
-                            <label for="header_play_buttons_css">Header Play Buttons CSS:</label>
+                            <label for="floating_player">Floating Player:</label>
                         </th>
                         <td>
-                            <textarea id="header_play_buttons_css" name="header_play_buttons_css" rows="50" class="large-text code" ><?php echo esc_textarea($header_play_buttons_css); ?></textarea>
+                            <input type="checkbox" id="floating_player" name="floating_player" value="1" <?php checked($floating_player, "1"); ?>>
                             <p class="description">
-                                CSS styles for the header play buttons. Default values are <a href="https://docs.type3.audio/#header-play-buttons">shown here</a>.
+                                When enabled, makes the audio player float/stick to the bottom of the screen while scrolling.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="custom_css">Custom CSS:</label>
+                        </th>
+                        <td>
+                            <textarea id="custom_css" name="custom_css" rows="50" class="large-text code" ><?php echo esc_textarea($custom_css); ?></textarea>
+                            <p class="description">
+                                Custom CSS styles for the TYPE III AUDIO player. This CSS will be injected whenever the player shortcode is used on a page.
                             </p>
                         </td>
                     </tr>
@@ -162,7 +175,7 @@ function type_iii_audio_options() {
     <script>
         // Initialize CodeMirror
         function initCodeMirror() {
-            var editor = wp.codeEditor.initialize('header_play_buttons_css', {
+            var editor = wp.codeEditor.initialize('custom_css', {
                 mode: 'css',
                 lineNumbers: true,
                 indentUnit: 4,
@@ -186,21 +199,9 @@ function type_iii_audio_options() {
         style.textContent = '.CodeMirror { height: 80em !important; }';
         document.head.appendChild(style);
 
-        document.getElementById('header_play_buttons').addEventListener('change', function() {
-            const cssRow = document.querySelector('.header-play-buttons-css-row');
-            cssRow.style.display = this.checked ? 'table-row' : 'none';
-            
-            // Reinitialize CodeMirror after a short delay to ensure the textarea is visible
-            if (this.checked) {
-                setTimeout(initCodeMirror, 100);
-            }
-        });
-
-        // Initial initialization if the textarea is visible
+        // Initial initialization
         jQuery(document).ready(function($) {
-            if (document.getElementById('header_play_buttons').checked) {
-                initCodeMirror();
-            }
+            initCodeMirror();
         });
     </script>
 

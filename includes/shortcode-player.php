@@ -22,6 +22,12 @@ function type_3_player($atts) {
         return ''; // Return empty string for logged-out users when preview mode is enabled
     }
 
+    // Check if header play buttons are enabled
+    $header_play_buttons = get_option("type_iii_audio_header_play_buttons", "0");
+    if ($header_play_buttons === "1") {
+        $attributes .= 'header-play-buttons="true" ';
+    }
+
     $atts = shortcode_atts($default_atts, $atts);
 
     foreach($atts as $key => $value) {

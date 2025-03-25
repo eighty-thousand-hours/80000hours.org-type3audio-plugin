@@ -16,6 +16,14 @@ add_action('wp_enqueue_scripts', 't3a_enqueue_scripts');
 function type_3_player($atts) {
     $attributes = '';
 
+    // Check if preview mode is enabled and user is not logged in
+    $preview_mode = get_option("type_iii_audio_preview_mode", "0");
+    if ($preview_mode === "1" && !is_user_logged_in()) {
+        return ''; // Return empty string for logged-out users when preview mode is enabled
+    }
+
+    $atts = shortcode_atts($default_atts, $atts);
+
     foreach($atts as $key => $value) {
         $attributes .= $key .'="' . $value . '" ';
     }

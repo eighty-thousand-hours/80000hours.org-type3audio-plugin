@@ -29,11 +29,13 @@ function type_iii_audio_options() {
 
     if (@$_POST["update_settings"] == "Y") {
         update_option("type_iii_audio_auth_key", $_POST["auth_key"]);
+        update_option("type_iii_audio_preview_mode", isset($_POST["preview_mode"]) ? "1" : "0");
         ?>
         <div class="updated"><p><strong><?php _e("Settings saved."); ?></strong></p></div>
         <?php
     }
     $auth_key = get_option("type_iii_audio_auth_key");
+    $preview_mode = get_option("type_iii_audio_preview_mode", "0");
     ?>
 
     <div class="wrap">
@@ -50,6 +52,17 @@ function type_iii_audio_options() {
                             <input type="text" id="auth_key" name="auth_key" value="<?php echo $auth_key; ?>" class="regular-text">
                             <p class="description">
                                 This key is used to authenticate requests to create and regenerate narrations.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="preview_mode">Preview Mode:</label>
+                        </th>
+                        <td>
+                            <input type="checkbox" id="preview_mode" name="preview_mode" value="1" <?php checked($preview_mode, "1"); ?>>
+                            <p class="description">
+                                When enabled, the audio player will only be visible to logged-in WordPress users.
                             </p>
                         </td>
                     </tr>

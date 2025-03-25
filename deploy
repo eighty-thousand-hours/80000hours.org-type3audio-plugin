@@ -1,0 +1,3 @@
+sh build
+
+git push origin main

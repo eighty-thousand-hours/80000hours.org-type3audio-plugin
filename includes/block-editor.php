@@ -527,10 +527,12 @@ add_filter('render_block', function($block_content, $block) {
     
     // Handle regular blocks with our attributes
     if (!empty($block['attrs']['doNotNarrate'])) {
-        return '<div class="t3a-do-not-narrate">' . $block_content . '</div>';
+        // Don't wrap the block content in a div, because it may affect the block's layout.
+        return $block_content;
     }
     if (!empty($block['attrs']['mustNarrate'])) {
-        return '<div class="t3a-must-narrate">' . $block_content . '</div>';
+        // Don't wrap the block content in a div, because it may affect the block's layout.
+        return $block_content;
     }
     if (!empty($block['attrs']['audioNote'])) {
         return '<div class="t3a-audio-note">' . $block_content . '</div>';

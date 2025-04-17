@@ -22,3 +22,4 @@ define('T3A_VERSION', '1.3');
 require_once T3A_PLUGIN_PATH . 'includes/shortcode-player.php';
 require_once T3A_PLUGIN_PATH . 'includes/block-editor.php';
 require_once T3A_PLUGIN_PATH . 'includes/admin-settings.php';
+require_once T3A_PLUGIN_PATH . 'includes/regeneration.php';

@@ -33,7 +33,7 @@ function t3a_send_regenerate_request($post_ID, $post, $update) {
     // Set transient for 5 seconds
     set_transient($transient_key, true, 5);
 
-    $post_url = get_permalink($post_ID);
+    $post_url = wp_get_canonical_url($post_ID);
     $post_type = get_post_type($post_ID);
     $auth_key = get_option("type_iii_audio_auth_key");
 

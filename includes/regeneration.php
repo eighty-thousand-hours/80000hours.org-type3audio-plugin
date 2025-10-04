@@ -41,6 +41,15 @@ function t3a_send_regenerate_request($post_ID, $post, $update) {
         return;
     }
 
+    // Check if post content contains the TYPE III AUDIO player
+    $content = isset($post->post_content) ? $post->post_content : '';
+    $has_shortcode = function_exists('has_shortcode') && has_shortcode($content, 'type_3_player');
+    $has_tag = stripos($content, '<type-3-player') !== false;
+
+    if (!$has_shortcode && !$has_tag) {
+        return; // Skip regeneration if player is not present in content
+    }
+
     $api_url = 'https://api.type3.audio/narration/regenerate';
     $payload = json_encode(array(
         'url' => $post_url,

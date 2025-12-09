@@ -37,7 +37,7 @@ function t3a_send_regenerate_request($post_ID, $post, $update) {
     $post_type = get_post_type($post_ID);
     $auth_key = get_option("type_iii_audio_auth_key");
 
-    if($post_type === "podcast") {
+    if($post_type === "podcast" || $post_type === "podcast_after_hours") {
         return;
     }
 

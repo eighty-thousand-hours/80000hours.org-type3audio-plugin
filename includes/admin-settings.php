@@ -29,18 +29,12 @@ function type_iii_audio_options() {
 
     if (@$_POST["update_settings"] == "Y") {
         update_option("type_iii_audio_auth_key", $_POST["auth_key"]);
-        update_option("type_iii_audio_preview_mode", isset($_POST["preview_mode"]) ? "1" : "0");
-        update_option("type_iii_audio_header_play_buttons", isset($_POST["header_play_buttons"]) ? "1" : "0");
-        update_option("type_iii_audio_floating_player", isset($_POST["floating_player"]) ? "1" : "0");
         update_option("type_iii_audio_custom_css", $_POST["custom_css"]);
         ?>
         <div class="updated"><p><strong><?php _e("Settings saved."); ?></strong></p></div>
         <?php
     }
     $auth_key = get_option("type_iii_audio_auth_key");
-    $preview_mode = get_option("type_iii_audio_preview_mode", "0");
-    $header_play_buttons = get_option("type_iii_audio_header_play_buttons", "0");
-    $floating_player = get_option("type_iii_audio_floating_player", "0");
     $custom_css = get_option("type_iii_audio_custom_css", "
 /* Heading play button should not be shown on small screens */
 .t3a-heading-play-button {
@@ -118,39 +112,6 @@ function type_iii_audio_options() {
                             <input type="text" id="auth_key" name="auth_key" value="<?php echo $auth_key; ?>" class="regular-text">
                             <p class="description">
                                 This key is used to authenticate requests to create and regenerate narrations.
-                            </p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">
-                            <label for="preview_mode">Preview Mode:</label>
-                        </th>
-                        <td>
-                            <input type="checkbox" id="preview_mode" name="preview_mode" value="1" <?php checked($preview_mode, "1"); ?>>
-                            <p class="description">
-                                When enabled, the audio player will only be visible to logged-in WordPress users.
-                            </p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">
-                            <label for="header_play_buttons">Header Play Buttons:</label>
-                        </th>
-                        <td>
-                            <input type="checkbox" id="header_play_buttons" name="header_play_buttons" value="1" <?php checked($header_play_buttons, "1"); ?>>
-                            <p class="description">
-                                When enabled, adds <a href="https://docs.type3.audio/#header-play-buttons">header play buttons</a> to the TYPE III AUDIO player.
-                            </p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">
-                            <label for="floating_player">Floating Player:</label>
-                        </th>
-                        <td>
-                            <input type="checkbox" id="floating_player" name="floating_player" value="1" <?php checked($floating_player, "1"); ?>>
-                            <p class="description">
-                                When enabled, makes the audio player float/stick to the bottom of the screen while scrolling.
                             </p>
                         </td>
                     </tr>

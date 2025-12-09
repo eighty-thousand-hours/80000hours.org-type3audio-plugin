@@ -27,6 +27,13 @@ function t3a_register_custom_css() {
 }
 
 function type_3_player($atts) {
+    // 80,000 Hours brand-specific player styling
+    define('T3A_PRIMARY_COLOR', '#333');
+    define('T3A_SECONDARY_COLOR', '#aaa');
+    define('T3A_ACCENT_COLOR', '#2ebdd1');
+    define('T3A_PRIMARY_FONT', "'museo-sans','Helvetica Neue',Helvetica,Arial,sans-serif");
+    define('T3A_SECONDARY_FONT', "'proxima-nova',Arial,sans-serif");
+
     // Define default attributes
     $default_atts = array(
         'url' => '',
@@ -61,6 +68,15 @@ function type_3_player($atts) {
         'async'
     );
 
+    // Enqueue custom player enhancements (analytics, scroll behavior, heading filters)
+    wp_enqueue_script(
+        'type-3-player-enhancements',
+        T3A_PLUGIN_URL . '/assets/js/player-enhancements.js',
+        array(), // No dependencies
+        T3A_VERSION,
+        true // Load in footer
+    );
+
     // If a post ID was passed, get post info from WordPress.
     if(!empty($post_id)):
 
@@ -69,7 +85,7 @@ function type_3_player($atts) {
 
         $thumb_id = get_post_thumbnail_id($post_id);
         $thumb_url_array = wp_get_attachment_image_src($thumb_id, 'medium', true);
-        if(!$cover_image_url): $cover_image_url = $thumb_url_array[0]; endif;
+        if(!$cover_image_url && is_array($thumb_url_array)): $cover_image_url = $thumb_url_array[0]; endif;
 
     endif;
 
@@ -94,113 +110,32 @@ function type_3_player($atts) {
         $min_height = '75px';
     endif;
 
-    $html = '<div style="width: 100%; min-height: ' . $min_height . '; clear: both;" class="' . $class . '">';
+    $html = '<div style="width: 100%; min-height: ' . esc_attr($min_height) . '; clear: both;" class="' . esc_attr($class) . '">';
 
     // Properties for the <type-3-player> element are documented here:
     // https://docs.type3.audio/#attribute-reference
     $html .= '
         <type-3-player '
-            . ($url ? ('mp3-url="' . $url . '"') : '')
-            . ($title ? ('title="' . $title . '"') : '') . '
-            cover-image-url="' . $cover_image_url . '"
-            background-color="' . $hex_background_color . '"
-            listen-to-this-page="' . $compact . '"
-            listen-to-this-page-text="' . $compact_text . '"
-            link-to-timestamp="' . $link_timestamps .'"
-            header-play-buttons="' . $header_play_buttons . '"
-            sticky="' . $sticky .'"
-            primary-color="#333"
-            secondary-color="#aaa"
-            accent-color="#2ebdd1"
-            primary-font-family="\'museo-sans\',\'Helvetica Neue\',Helvetica,Arial,sans-serif"
-            secondary-font-family="\'proxima-nova\',Arial,sans-serif"
+            . ($url ? ('mp3-url="' . esc_attr($url) . '"') : '')
+            . ($title ? ('title="' . esc_attr($title) . '"') : '') . '
+            cover-image-url="' . esc_attr($cover_image_url) . '"
+            background-color="' . esc_attr($hex_background_color) . '"
+            listen-to-this-page="' . esc_attr($compact) . '"
+            listen-to-this-page-text="' . esc_attr($compact_text) . '"
+            link-to-timestamp="' . esc_attr($link_timestamps) .'"
+            header-play-buttons="' . esc_attr($header_play_buttons) . '"
+            sticky="' . esc_attr($sticky) .'"
+            primary-color="' . T3A_PRIMARY_COLOR . '"
+            secondary-color="' . T3A_SECONDARY_COLOR . '"
+            accent-color="' . T3A_ACCENT_COLOR . '"
+            primary-font-family="' . T3A_PRIMARY_FONT . '"
+            secondary-font-family="' . T3A_SECONDARY_FONT . '"
             analytics="custom"
             t3a-logo="false"
             link-to-timestamp-selector=".type-3-player__replace-timestamps-with-links"
             feedback-button="false"
-            custom-css="' . $custom_css . '"
+            custom-css="' . esc_attr($custom_css) . '"
         ></type-3-player>';
-
-    // Add custom analytics handler.
-    // Also add an event listener which ensures that, even on browsers that
-    // support the rubber band effect, the player isn't visible below the footer.
-    $html .= '<script type="text/javascript" data-cfasync="false">
-        // Track cumulative listening time so we can fire a custom event at 6 minutes
-        // NOTE: This tracker is shared globally across ALL audio players on the page.
-        // If multiple players are present, listening to any of them adds to the total.
-        // This measures total audio engagement per page, not per-player engagement.
-        if (!window.t3aListeningTimeTracker) {
-            window.t3aListeningTimeTracker = {
-                totalSecondsListened: 0,
-                hasFiredSixMinuteEvent: false
-            };
-        }
-        if (!window.t3aAnalytics) {
-            window.t3aAnalytics = function(eventType, event) {
-            analytics.track(eventType, event);
-            gtag("event", eventType, event);
-            if (typeof plausible === "function") {
-                plausible(eventType, {props: event});
-            }
-            if (eventType === "continued-listening") {
-                window.t3aListeningTimeTracker.totalSecondsListened += 30;
-                // Fire a one-time event when user has listened for 6 minutes (360 seconds)
-                if (!window.t3aListeningTimeTracker.hasFiredSixMinuteEvent &&
-                    window.t3aListeningTimeTracker.totalSecondsListened >= 360) {
-                    // Set flag first to prevent any race conditions
-                    window.t3aListeningTimeTracker.hasFiredSixMinuteEvent = true;
-                    var sixMinuteEvent = {
-                        ...event,
-                        action: "Listened for 6 minutes",
-                        totalSecondsListened: window.t3aListeningTimeTracker.totalSecondsListened
-                    };
-                    // Send to all tracking services
-                    analytics.track("Listened for 6 minutes", sixMinuteEvent);
-                    gtag("event", "Listened for 6 minutes", sixMinuteEvent);
-                    if (typeof plausible === "function") {
-                        plausible("Listened for 6 minutes", {props: sixMinuteEvent});
-                    }
-                    // Trigger custom event for key page engagement tracking
-                    if (typeof window.eightyKAudioListened6Min === "function") {
-                        window.eightyKAudioListened6Min();
-                    }
-                }
-            }
-            }
-        }
-        if (!window.t3aScrollListenerAdded) {
-            window.addEventListener("scroll", function() {
-                const players = document.querySelectorAll("type-3-player");
-                const tocButton = document.querySelector(".sidebar-toc__open-button-wrap");
-                const scrollTop = window.scrollY;
-                const viewportHeight = window.innerHeight;
-                const totalHeight = document.documentElement.scrollHeight;
-                if (scrollTop + viewportHeight >= totalHeight) {
-                    players.forEach(player => player.style.display = "none");
-                    if (tocButton) {
-                        tocButton.style.display = "none";
-                    }
-                } else {
-                    players.forEach(player => player.style.display = "");
-                    if (tocButton) {
-                        tocButton.style.display = "";
-                    }
-                }
-            });
-            window.t3aScrollListenerAdded = true;
-        }
-    </script>';
-
-    $html .= '<script type="text/javascript">
-        document.addEventListener("DOMContentLoaded", function() {
-            const noPlayButtonTitles = ["Read more", "Read next", "Learn more"];
-            document.querySelectorAll("h2, h3").forEach(function(element) {
-                if (noPlayButtonTitles.includes(element.textContent.trim())) {
-                    element.classList.add("no-heading-play-button");
-                }
-            });
-        });
-    </script>';
 
     $html .= '</div>';
 

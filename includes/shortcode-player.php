@@ -50,7 +50,7 @@ function type_3_player($atts) {
     // Always register and enqueue custom CSS
     t3a_register_custom_css();
 
-    $atts = shortcode_atts($default_atts, $atts);
+    $atts = shortcode_atts(array(), $atts);
 
     foreach($atts as $key => $value) {
         $attributes .= $key .'="' . $value . '" ';

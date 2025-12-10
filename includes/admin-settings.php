@@ -29,73 +29,11 @@ function type_iii_audio_options() {
 
     if (@$_POST["update_settings"] == "Y") {
         update_option("type_iii_audio_auth_key", $_POST["auth_key"]);
-        update_option("type_iii_audio_custom_css", $_POST["custom_css"]);
         ?>
         <div class="updated"><p><strong><?php _e("Settings saved."); ?></strong></p></div>
         <?php
     }
     $auth_key = get_option("type_iii_audio_auth_key");
-    $custom_css = get_option("type_iii_audio_custom_css", "
-/* Heading play button should not be shown on small screens */
-.t3a-heading-play-button {
-  display: none;
-}
-
-/* Set minimum width at which heading play button should be shown */
-@media screen and (min-width: 850px) {
-  .t3a-heading-play-button {
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    margin-left: -34px;
-    margin-right: 10px;
-    border-radius: 9999px;
-    border: none;
-    width: 1.5rem;
-    height: 1.5rem;
-    outline: none;
-    cursor: pointer;
-    transform: translate(0, 0);
-    z-index: 10;
-
-    /* Colour of the play button */
-    background-color: #ddd;
-    /* Colour of the play button icon. */
-    color: #fff;
-  }
-
-  .t3a-heading-play-button:hover {
-    /* Colour of the play on hover */
-    background-color: #333;
-  }
-
-  .t3a-heading-play-button:focus {
-    outline: none;
-  }
-
-  .t3a-heading-play-icon {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-left: 2px;  
-  }
-
-  /* Refine this to match the dimensions of your heading typeface */
-  h1 .t3a-heading-play-button { margin-top: 9px } 
-  h2 .t3a-heading-play-button { margin-top: 9px } 
-  h3 .t3a-heading-play-button { margin-top: 3px }
-}
-
-/* Show the heading play button only after the user starts playback */
-.t3a-heading-play-button {
-  display: none;
-}
-
-.t3a-playback-started .t3a-heading-play-button {
-  display: block;
-}
-");
     ?>
 
     <div class="wrap">
@@ -115,17 +53,6 @@ function type_iii_audio_options() {
                             </p>
                         </td>
                     </tr>
-                    <tr>
-                        <th scope="row">
-                            <label for="custom_css">Custom CSS:</label>
-                        </th>
-                        <td>
-                            <textarea id="custom_css" name="custom_css" rows="50" class="large-text code" ><?php echo esc_textarea($custom_css); ?></textarea>
-                            <p class="description">
-                                Custom CSS styles for the TYPE III AUDIO player. This CSS will be injected whenever the player shortcode is used on a page.
-                            </p>
-                        </td>
-                    </tr>
                 </tbody>
             </table>
             <hr />
@@ -133,63 +60,7 @@ function type_iii_audio_options() {
         </form>
     </div>
 
-    <script>
-        // Initialize CodeMirror
-        function initCodeMirror() {
-            var editor = wp.codeEditor.initialize('custom_css', {
-                mode: 'css',
-                lineNumbers: true,
-                indentUnit: 4,
-                tabSize: 4,
-                lineWrapping: true,
-                autoCloseBrackets: true,
-                matchBrackets: true,
-                autoCloseTags: true,
-                matchTags: true,
-                indentWithTabs: false,
-                theme: 'default',
-                height: '80em'
-            }); 
-
-            // Force the height after initialization
-            jQuery('.CodeMirror').css('height', '80em');
-        }
-
-        // Add CSS to ensure height persists
-        var style = document.createElement('style');
-        style.textContent = '.CodeMirror { height: 80em !important; }';
-        document.head.appendChild(style);
-
-        // Initial initialization
-        jQuery(document).ready(function($) {
-            initCodeMirror();
-        });
-    </script>
-
 <?php
 }
 
-// Enqueue CodeMirror
-function t3a_enqueue_code_editor() {
-    $screen = get_current_screen();
-    if ($screen && $screen->id === 'settings_page_type_iii_audio') {
-        wp_enqueue_code_editor(array(
-            'type' => 'text/css',
-            'codemirror' => array(
-                'mode' => 'css',
-                'lineNumbers' => true,
-                'indentUnit' => 4,
-                'tabSize' => 4,
-                'lineWrapping' => true,
-                'autoCloseBrackets' => true,
-                'matchBrackets' => true,
-                'autoCloseTags' => true,
-                'matchTags' => true,
-                'indentWithTabs' => false,
-                'theme' => 'default',
-                'height' => '50em'
-            )
-        ));
-    }
-}
-add_action('admin_enqueue_scripts', 't3a_enqueue_code_editor'); 
+ 

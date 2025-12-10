@@ -1,0 +1,173 @@
+/*
+  Styles for the TYPE III AUDIO player
+
+  This file contains all player-specific styles for the 80,000 Hours fork.
+  These styles are enqueued when the [type_3_player] shortcode is used.
+*/
+
+
+@media print {
+    type-3-player {
+        display: none;
+    }
+}
+
+/*
+  Styles for the "heading play button" feature.
+*/
+
+
+/* Heading play buttons should not be shown on titles */
+h1 .t3a-heading-play-button {
+    display: none;
+}
+/* ... or on small headings */
+h4 .t3a-heading-play-button,
+h5 .t3a-heading-play-button,
+h6 .t3a-heading-play-button {
+    display: none;
+}
+/* ... or inside panels (this includes accordions and collapses) */
+.panel .t3a-heading-play-button {
+    display: none;
+}
+/* ... or inside wells */
+.well .t3a-heading-play-button {
+    display: none;
+}
+/* ... or inside expandable wells */
+.eightyk-expandable-well-content .t3a-heading-play-button {
+    display: none;
+}
+/* ... or inside blockquote elements */
+blockquote .t3a-heading-play-button {
+    display: none;
+}
+/* ... or inside buttons */
+.btn .t3a-heading-play-button {
+    display: none;
+}
+/* ... or on headings that are just below another heading which may have a button */
+h2 + h3 .t3a-heading-play-button, h2 + h4 .t3a-heading-play-button, h2 + h5 .t3a-heading-play-button, h2 + h6 .t3a-heading-play-button,
+h3 + h4 .t3a-heading-play-button, h3 + h5 .t3a-heading-play-button, h3 + h6 .t3a-heading-play-button {
+    display: none;
+}
+/* ... or anywhere it's explicitly disabled */
+/* (Javascript in the type3_audio_player shortcode adds this class to
+   headings with text like "Read more" or "Read next") */
+.no-heading-play-button .t3a-heading-play-button {
+    display: none;
+}
+
+
+/**
+    When the above selectors apply, the heading play buttons will NEVER appear.
+    If the player just hasn't been started yet, or the screen is currently small,
+    then the heading play buttons may appear later. Since we want the buttons to
+    fade in in that case, we use the transitionable opacity and visibility
+    properties instead of display: none/block.
+ */
+
+.t3a-heading-play-button {
+    transition: opacity 0.2s linear, visibility 0.2s linear;
+}
+
+/* The screen is small. */
+.t3a-heading-play-button {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* The player hasn't been started. */
+body:not(.t3a-playback-started) .t3a-heading-play-button {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/*
+  The below is modified from https://docs.type3.audio/#header-play-buttons
+*/
+
+/* Set minimum width at which heading play button should be shown */
+@media screen and (min-width: 850px) {
+    .t3a-heading-play-button {
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+.t3a-heading-play-button {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin-left: -45px;
+    margin-right: 15px;
+    border-radius: 9999px;
+    border: none;
+    color: #fff;
+    outline: none;
+    cursor: pointer;
+    transform: translate(0, 0);
+    z-index: 10;
+    background-color: #2ebdd1; /* @brand-primary */
+    color: white;
+}
+
+.t3a-heading-play-button:hover {
+    background-color: #5ecde0; /* @teal-light */
+}
+
+/* Change colors when on gray background */
+.bg-off-white .t3a-heading-play-button {
+    color: #eee; /* @gray-lighter */
+}
+
+.t3a-heading-play-button:focus {
+    outline: none;
+}
+
+.t3a-heading-play-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 2px;
+}
+
+/* Match the styles to the heading size */
+h2 .t3a-heading-play-button {
+    margin-top: 3.5px;
+    width: 1.5rem;
+    height: 1.5rem;
+}
+h3 .t3a-heading-play-button {
+    margin-top: 1px;
+    width: 1.3rem;
+    height: 1.3rem;
+}
+
+/*
+  Sticky player styles
+*/
+
+.type-3-player.sticky {
+    box-shadow: 0px -2px 10px 0px rgb(171 171 171 / 60%);
+    z-index: 8000;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.type-3-player.sticky.hidden:not(.loading) {
+    display: flex !important;
+    opacity: 0;
+    visibility: hidden;
+}
+
+/*
+  Button pill styles
+*/
+
+.-t3a-button-pill span {
+    padding-top: 1px !important;
+    font-weight: 600;
+}

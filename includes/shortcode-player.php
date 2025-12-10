@@ -9,30 +9,21 @@ if (!defined('ABSPATH')) {
 
 function t3a_enqueue_scripts() {
     wp_register_script('type-3-player', 'https://embed.type3.audio/player.js', array(), '1.0.0', true);
+    wp_register_style('type-3-player-styles', T3A_PLUGIN_URL . '/assets/css/player.css', array(), T3A_VERSION);
 }
 
 add_action('wp_enqueue_scripts', 't3a_enqueue_scripts');
 
-function t3a_register_custom_css() {
-    $custom_css = get_option("type_iii_audio_custom_css", "");
-    
-    if (!empty($custom_css)) {
-        wp_register_style(
-            'type-3-custom-css',
-            false // No external file
-        );
-        wp_enqueue_style('type-3-custom-css');
-        wp_add_inline_style('type-3-custom-css', $custom_css);
-    }
-}
-
 function type_3_player($atts) {
     // 80,000 Hours brand-specific player styling
-    define('T3A_PRIMARY_COLOR', '#333');
-    define('T3A_SECONDARY_COLOR', '#aaa');
-    define('T3A_ACCENT_COLOR', '#2ebdd1');
-    define('T3A_PRIMARY_FONT', "'museo-sans','Helvetica Neue',Helvetica,Arial,sans-serif");
-    define('T3A_SECONDARY_FONT', "'proxima-nova',Arial,sans-serif");
+    $t3a_primary_color = '#333';
+    $t3a_secondary_color = '#aaa';
+    $t3a_accent_color = '#2ebdd1';
+    $t3a_primary_font = "'museo-sans','Helvetica Neue',Helvetica,Arial,sans-serif";
+    $t3a_secondary_font = "'proxima-nova',Arial,sans-serif";
+
+    // Note: All player CSS is now in assets/css/player.css
+    // (Previously was in theme LESS file, but moved to plugin for easier fork maintenance)
 
     // Define default attributes
     $default_atts = array(
@@ -53,11 +44,11 @@ function type_3_player($atts) {
     // Extract shortcode attributes with defaults
     extract(shortcode_atts($default_atts, $atts));
 
-    // Always register and enqueue custom CSS
-    t3a_register_custom_css();
-
     wp_enqueue_script('type-3-player');
     wp_script_add_data('type-3-player', array('type', 'crossorigin'), array('module', ''));
+
+    // Enqueue player styles
+    wp_enqueue_style('type-3-player-styles');
 
     // Add async attribute to <script> tag so that it's not blocking loading our
     // deferred scripts.
@@ -125,11 +116,11 @@ function type_3_player($atts) {
             link-to-timestamp="' . esc_attr($link_timestamps) .'"
             header-play-buttons="' . esc_attr($header_play_buttons) . '"
             sticky="' . esc_attr($sticky) .'"
-            primary-color="' . T3A_PRIMARY_COLOR . '"
-            secondary-color="' . T3A_SECONDARY_COLOR . '"
-            accent-color="' . T3A_ACCENT_COLOR . '"
-            primary-font-family="' . T3A_PRIMARY_FONT . '"
-            secondary-font-family="' . T3A_SECONDARY_FONT . '"
+            primary-color="' . esc_attr($t3a_primary_color) . '"
+            secondary-color="' . esc_attr($t3a_secondary_color) . '"
+            accent-color="' . esc_attr($t3a_accent_color) . '"
+            primary-font-family="' . esc_attr($t3a_primary_font) . '"
+            secondary-font-family="' . esc_attr($t3a_secondary_font) . '"
             analytics="custom"
             t3a-logo="false"
             link-to-timestamp-selector=".type-3-player__replace-timestamps-with-links"
@@ -156,7 +147,7 @@ function type_3_player($atts) {
 }
 
 function t3a_is_hardcoded_mp3_url($atts) {
-    return isset($atts['mp3-url']) && $atts['mp3-url'] !== '';
+    return isset($atts['url']) && $atts['url'] !== '';
 }
 
 function t3a_is_post_published() {

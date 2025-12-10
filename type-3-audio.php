@@ -32,7 +32,6 @@ define('T3A_VERSION', '1.6');
 
 // Include required files
 require_once T3A_PLUGIN_PATH . 'includes/shortcode-player.php';
-require_once T3A_PLUGIN_PATH . 'includes/block-editor.php';
 require_once T3A_PLUGIN_PATH . 'includes/admin-settings.php';
 require_once T3A_PLUGIN_PATH . 'includes/regeneration.php';
 require_once T3A_PLUGIN_PATH . 'includes/manage-narration-metabox.php';

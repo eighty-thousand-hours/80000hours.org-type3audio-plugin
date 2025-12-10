@@ -107,8 +107,8 @@ function type_3_player($atts) {
     // https://docs.type3.audio/#attribute-reference
     $html .= '
         <type-3-player '
-            . ($url ? ('mp3-url="' . esc_attr($url) . '"') : '')
-            . ($title ? ('title="' . esc_attr($title) . '"') : '') . '
+            . ($url ? ('mp3-url="' . esc_attr($url) . '" ') : '')
+            . ($title ? ('title="' . esc_attr($title) . '" ') : '') . '
             cover-image-url="' . esc_attr($cover_image_url) . '"
             background-color="' . esc_attr($hex_background_color) . '"
             listen-to-this-page="' . esc_attr($compact) . '"

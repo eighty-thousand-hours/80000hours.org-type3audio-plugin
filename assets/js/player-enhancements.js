@@ -32,7 +32,7 @@
                     window.t3aListeningTimeTracker.totalSecondsListened >= 360) {
                     // Set flag first to prevent any race conditions
                     window.t3aListeningTimeTracker.hasFiredSixMinuteEvent = true;
-                    var sixMinuteEvent = {
+                    const sixMinuteEvent = {
                         ...event,
                         action: "Listened for 6 minutes",
                         totalSecondsListened: window.t3aListeningTimeTracker.totalSecondsListened

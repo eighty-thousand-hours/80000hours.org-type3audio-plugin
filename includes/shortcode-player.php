@@ -158,4 +158,4 @@ function t3a_is_post_published() {
     return isset($post) && is_object($post) && $post->post_status === 'publish';
 }
 
-add_shortcode('type_3_player', 'type_3_player'); 
+add_shortcode('type3_audio_player', 'type_3_player'); 

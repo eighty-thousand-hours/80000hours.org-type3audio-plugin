@@ -46,7 +46,7 @@ function t3a_enqueue_manage_narration_metabox_assets($hook_suffix) {
 
     $screen = get_current_screen();
 
-    if (!$screen || !in_array($screen->post_type, array('post', 'page'), true)) {
+    if (!$screen || !in_array($screen->post_type, array('skill_set', 'ai_career_guide_page', 'career_profile', 'problem_profile', 'article'), true)) {
         return;
     }
 
@@ -81,7 +81,7 @@ function t3a_enqueue_manage_narration_metabox_assets($hook_suffix) {
  * @return void
  */
 function t3a_register_manage_narration_metabox() {
-    $post_types = array('post', 'page');
+    $post_types = array('skill_set', 'ai_career_guide_page', 'career_profile', 'problem_profile', 'article');
 
     foreach ($post_types as $post_type) {
         add_meta_box(

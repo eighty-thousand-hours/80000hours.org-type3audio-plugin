@@ -168,7 +168,7 @@ function t3a_render_manage_narration_metabox($post) {
 
     $status_base_url = ($current_host === 'wordpress.local')
         ? 'http://localhost:3003'
-        : 'https://clients.type3.audio';
+        : 'https://api.type3.audio';
 
     $status_url = $status_base_url . '/narration/status?source_url=' . rawurlencode($permalink);
 

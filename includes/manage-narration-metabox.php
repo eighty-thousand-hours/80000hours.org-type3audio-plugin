@@ -181,7 +181,7 @@ function t3a_render_manage_narration_metabox($post) {
     echo '<p class="t3a-manage-narration__generated js-t3a-manage-narration-generated"></p>';
     echo '<div style="display: flex; align-items: center; justify-content: space-between;">';
     echo '<p class="t3a-manage-narration__action js-t3a-manage-narration-action" style="margin: 0;"><a class="button" style="display:none;" href="' . esc_url($manage_url) . '" target="_blank" rel="noopener noreferrer"></a></p>';
-    echo '<p class="js-t3a-manage-narration-login" style="display: none; color: #999; font-size: 11px; margin: 0;"><a href="https://google.com" target="_blank" rel="noopener noreferrer" style=" margin-top: 3px;  text-decoration: underline;"> Instructions</a></p>';
+    echo '<p class="js-t3a-manage-narration-login" style="display: none; color: #999; font-size: 11px; margin: 0;"><a href="https://80k.info/narrationsfeed" target="_blank" rel="noopener noreferrer" style=" margin-top: 3px;  text-decoration: underline;"> Instructions</a></p>';
     echo '</div>';
     echo '</div>';
 }

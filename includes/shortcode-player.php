@@ -9,7 +9,7 @@ if (!defined('ABSPATH')) {
 
 function t3a_enqueue_scripts() {
     wp_register_script('type-3-player', 'https://embed.type3.audio/player.js', array(), '1.0.0', true);
-    wp_register_style('type-3-player-styles', T3A_PLUGIN_URL . '/assets/css/player.css', array(), T3A_VERSION);
+    wp_register_style('type-3-player-styles', T3A_PLUGIN_URL . '/assets/css/player.css', array(), T3A_VERSION . '.' . T3A_80K_ASSET_REV);
 }
 
 add_action('wp_enqueue_scripts', 't3a_enqueue_scripts');
@@ -64,7 +64,7 @@ function type_3_player($atts) {
         'type-3-player-enhancements',
         T3A_PLUGIN_URL . '/assets/js/player-enhancements.js',
         array(), // No dependencies
-        T3A_VERSION,
+        T3A_VERSION . '.' . T3A_80K_ASSET_REV,
         true // Load in footer
     );
 

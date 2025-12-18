@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# Pre-commit hook to enforce version bumping when asset files are modified
+# This ensures cache busting works properly for CSS and JS files
+
+# Colors for output
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
+# Check if any CSS or JS files in the assets directory are being committed
+MODIFIED_ASSETS=()
+while IFS= read -r file; do
+    if [[ "$file" =~ ^assets/.*\.(css|js)$ ]]; then
+        MODIFIED_ASSETS+=("$file")
+    fi
+done < <(git diff --cached --name-only)
+
+# If no asset files are modified, allow commit
+if [ ${#MODIFIED_ASSETS[@]} -eq 0 ]; then
+    exit 0
+fi
+
+# Asset files are modified - check if T3A_80K_ASSET_REV was bumped
+VERSION_FILE="type-3-audio.php"
+
+# Check if T3A_80K_ASSET_REV line was modified in this commit
+if ! git diff --cached | grep -q "^[+-].*T3A_80K_ASSET_REV"; then
+    echo -e "${RED}╔═══════════════════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${RED}║                                                                           ║${NC}"
+    echo -e "${RED}║                     ⚠️  VERSION BUMP REQUIRED  ⚠️                          ║${NC}"
+    echo -e "${RED}║                                                                           ║${NC}"
+    echo -e "${RED}║  You are committing changes to asset files:                              ║${NC}"
+    for asset in "${MODIFIED_ASSETS[@]}"; do
+        echo -e "${RED}║    - ${asset}${NC}"
+    done
+    echo -e "${RED}║                                                                           ║${NC}"
+    echo -e "${RED}║  But T3A_80K_ASSET_REV in ${VERSION_FILE} wasn't bumped!        ║${NC}"
+    echo -e "${RED}║                                                                           ║${NC}"
+    echo -e "${RED}║  WHY: Without a version bump, browsers will serve stale cached files     ║${NC}"
+    echo -e "${RED}║       to users, and they won't see your CSS/JS changes after deployment. ║${NC}"
+    echo -e "${RED}║                                                                           ║${NC}"
+    echo -e "${RED}║  TO FIX:                                                                  ║${NC}"
+    echo -e "${RED}║    1. Open ${VERSION_FILE}                                      ║${NC}"
+    echo -e "${RED}║    2. Find: define('T3A_80K_ASSET_REV', 'N');                            ║${NC}"
+    echo -e "${RED}║    3. Increment N by 1 (e.g., '1' → '2', '2' → '3')                      ║${NC}"
+    echo -e "${RED}║    4. Stage the file: git add ${VERSION_FILE}                   ║${NC}"
+    echo -e "${RED}║                                                                           ║${NC}"
+    echo -e "${RED}║  NOTE: Do NOT bump T3A_VERSION (only bump when syncing from upstream)    ║${NC}"
+    echo -e "${RED}║                                                                           ║${NC}"
+    echo -e "${RED}║  To bypass this check (NOT recommended):                                 ║${NC}"
+    echo -e "${RED}║    git commit --no-verify                                                ║${NC}"
+    echo -e "${RED}║                                                                           ║${NC}"
+    echo -e "${RED}╚═══════════════════════════════════════════════════════════════════════════╝${NC}"
+    exit 1
+fi
+
+# All checks passed!
+echo -e "${GREEN}✓ Version bump detected for modified asset files. Cache busting will work correctly!${NC}"
+exit 0

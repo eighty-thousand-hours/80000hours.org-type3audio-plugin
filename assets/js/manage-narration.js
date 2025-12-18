@@ -1,3 +1,27 @@
+/**
+ * TYPE III AUDIO - Manage Narration UI
+ * Admin interface for managing post narrations in WordPress
+ *
+ * ╔═══════════════════════════════════════════════════════════════════════════╗
+ * ║                                                                           ║
+ * ║                          ⚠️  CRITICAL REMINDER  ⚠️                         ║
+ * ║                                                                           ║
+ * ║   AFTER MAKING ANY CHANGES TO THIS JS FILE, YOU MUST:                    ║
+ * ║                                                                           ║
+ * ║   1. BUMP T3A_80K_ASSET_REV in type-3-audio.php                          ║
+ * ║      - Update the T3A_80K_ASSET_REV constant                             ║
+ * ║      - Increment the number: 1 → 2 → 3 → 4...                            ║
+ * ║                                                                           ║
+ * ║   2. DO NOT bump T3A_VERSION (only bump when syncing from upstream)      ║
+ * ║                                                                           ║
+ * ║   3. This is REQUIRED for cache busting!                                 ║
+ * ║      Without bumping T3A_80K_ASSET_REV, browsers will serve stale JS.    ║
+ * ║                                                                           ║
+ * ║   See AGENTS.md for full deployment guidelines.                          ║
+ * ║                                                                           ║
+ * ╚═══════════════════════════════════════════════════════════════════════════╝
+ */
+
 'use strict';
 
 (function () {

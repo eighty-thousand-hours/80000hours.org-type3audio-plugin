@@ -54,7 +54,7 @@ function t3a_enqueue_manage_narration_metabox_assets($hook_suffix) {
         't3a-manage-narration',
         T3A_PLUGIN_URL . '/assets/js/manage-narration.js',
         array('wp-date'),
-        T3A_VERSION,
+        T3A_VERSION . '.' . T3A_80K_ASSET_REV,
         true
     );
 

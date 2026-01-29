@@ -14,6 +14,120 @@ function t3a_enqueue_scripts() {
 
 add_action('wp_enqueue_scripts', 't3a_enqueue_scripts');
 
+/**
+ * Get the podcast subscribe URLs for the 80,000 Hours narrations feed.
+ *
+ * @return array<string,string> Array of subscribe URLs keyed by platform.
+ */
+function t3a_get_podcast_subscribe_urls() {
+    return array(
+        'apple' => 'https://podcasts.apple.com/us/podcast/80-000-hours-narrations/id1860831515',
+        'spotify' => 'https://open.spotify.com/show/49no4dH0N52R2PCFaw7L8Z',
+        'podcast-addict' => 'https://podcastaddict.com/podcast/80000-hours-narrations/4649902',
+        'rss' => 'https://feeds.type3.audio/80000hours.rss',
+    );
+}
+
+/**
+ * Fetch narration status from Type3.audio API with caching.
+ *
+ * @param string $source_url The URL of the post to check.
+ * @return array|null The narration status data or null on failure.
+ */
+function t3a_get_narration_status($source_url) {
+    // Create a cache key based on the source URL
+    $cache_key = 't3a_narration_status_' . md5($source_url);
+
+    // Try to get cached data
+    $cached_data = get_transient($cache_key);
+    if ($cached_data !== false) {
+        return $cached_data;
+    }
+
+    // Determine the API base URL (same logic as in manage-narration-metabox.php)
+    $current_host = (string) wp_parse_url(home_url(), PHP_URL_HOST);
+    $status_base_url = ($current_host === 'wordpress.local')
+        ? 'http://localhost:3003'
+        : 'https://api.type3.audio';
+
+    $status_url = $status_base_url . '/narration/status?source_url=' . rawurlencode($source_url);
+
+    // Fetch the narration status from the API
+    $response = wp_remote_get($status_url, array(
+        'timeout' => 5,
+        'headers' => array(
+            'Accept' => 'application/json',
+        ),
+    ));
+
+    // Handle errors
+    if (is_wp_error($response)) {
+        return null;
+    }
+
+    $status_code = wp_remote_retrieve_response_code($response);
+    if ($status_code !== 200) {
+        return null;
+    }
+
+    $body = wp_remote_retrieve_body($response);
+    $data = json_decode($body, true);
+
+    if (!is_array($data)) {
+        return null;
+    }
+
+    // Cache the result for 12 hours (43200 seconds)
+    set_transient($cache_key, $data, 12 * HOUR_IN_SECONDS);
+
+    return $data;
+}
+
+/**
+ * Check if the current post should show podcast subscribe buttons.
+ *
+ * @param int|null $post_id The post ID to check. If null, uses the current post.
+ * @return bool True if subscribe buttons should be shown, false otherwise.
+ */
+function t3a_should_show_podcast_subscribe($post_id = null) {
+    if (!$post_id) {
+        global $post;
+        if (!$post) {
+            return false;
+        }
+        $post_id = $post->ID;
+    }
+
+    $post = get_post($post_id);
+    if (!$post) {
+        return false;
+    }
+
+    // Check if the post type is eligible for narrations
+    $eligible_post_types = array('skill_set', 'ai_career_guide_page', 'career_profile', 'problem_profile', 'article');
+    if (!in_array($post->post_type, $eligible_post_types, true)) {
+        return false;
+    }
+
+    // Get the permalink
+    $permalink = get_permalink($post);
+    if (!$permalink) {
+        return false;
+    }
+
+    // Normalize 80000hours.org subdomains to production domain
+    $host = wp_parse_url($permalink, PHP_URL_HOST);
+    if ($host && strpos($host, '80000hours.org') !== false && $host !== '80000hours.org') {
+        $permalink = str_replace($host, '80000hours.org', $permalink);
+    }
+
+    // Fetch the narration status from the API
+    $status = t3a_get_narration_status($permalink);
+
+    // Check if the narration is published to the podcast
+    return is_array($status) && !empty($status['published_to_podcast']);
+}
+
 function type_3_player($atts) {
     // 80,000 Hours brand-specific player styling
     $t3a_primary_color = '#333';
@@ -103,6 +217,16 @@ function type_3_player($atts) {
 
     $html = '<div style="width: 100%; min-height: ' . esc_attr($min_height) . '; clear: both;" class="' . esc_attr($class) . '">';
 
+    // Check if we should show podcast subscribe buttons. The t3a_should_show_podcast_subscribe() function
+    // will use the global post if $post_id is not provided, so we can call it directly.
+    $show_subscribe = false;
+    $subscribe_urls = array();
+
+    if (t3a_should_show_podcast_subscribe($post_id)) {
+        $show_subscribe = true;
+        $subscribe_urls = t3a_get_podcast_subscribe_urls();
+    }
+
     // Properties for the <type-3-player> element are documented here:
     // https://docs.type3.audio/#attribute-reference
     $html .= '
@@ -125,7 +249,17 @@ function type_3_player($atts) {
             t3a-logo="false"
             link-to-timestamp-selector=".type-3-player__replace-timestamps-with-links"
             feedback-button="false"
-            custom-css="' . esc_attr($custom_css) . '"
+            custom-css="' . esc_attr($custom_css) . '"';
+
+    // Add podcast subscribe URLs if applicable
+    if ($show_subscribe && !empty($subscribe_urls)) {
+        foreach ($subscribe_urls as $platform => $url) {
+            $html .= '
+            subscribe-url--' . esc_attr($platform) . '="' . esc_attr($url) . '"';
+        }
+    }
+
+    $html .= '
         ></type-3-player>';
 
     $html .= '</div>';

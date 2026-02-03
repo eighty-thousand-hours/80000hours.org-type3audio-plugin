@@ -29,21 +29,27 @@ function t3a_get_podcast_subscribe_urls() {
 }
 
 /**
- * Fetch narration status from Type3.audio API with caching.
+ * Check if a post is published to the podcast feed via Type3.audio API (with caching).
  *
  * @param string $source_url The URL of the post to check.
- * @return array|null The narration status data or null on failure.
+ * @return bool True if published to podcast, false otherwise.
  */
-function t3a_get_narration_status($source_url) {
+function t3a_is_published_to_podcast($source_url) {
     // Create a readable cache key from the URL path only
+    $key_prefix = 'pubbed_to_narrations_podcast_';
     $key_suffix = preg_replace('#^https?://[^/]+#', '', $source_url);  // Strip protocol + domain
     $key_suffix = str_replace('/', '_', $key_suffix);                   // Replace / with _
     $key_suffix = trim($key_suffix, '_');                               // Remove leading/trailing _
-    $cache_key = 't3astatus_' . $key_suffix;
 
-    // Try to get cached data
+    // WordPress transient keys max out at 172 chars; fall back to MD5 hash if too long
+    if (strlen($key_prefix . $key_suffix) > 172) {
+        $key_suffix = md5($source_url);
+    }
+    $cache_key = $key_prefix . $key_suffix;
+
+    // Try to get cached data (note: must check for null, not false, since false is a valid cached value)
     $cached_data = get_transient($cache_key);
-    if ($cached_data !== false) {
+    if ($cached_data !== null && $cached_data !== false) {
         return $cached_data;
     }
 
@@ -63,27 +69,30 @@ function t3a_get_narration_status($source_url) {
         ),
     ));
 
-    // Handle errors
+    // Handle errors - don't cache failures, return false
     if (is_wp_error($response)) {
-        return null;
+        return false;
     }
 
     $status_code = wp_remote_retrieve_response_code($response);
     if ($status_code !== 200) {
-        return null;
+        return false;
     }
 
     $body = wp_remote_retrieve_body($response);
     $data = json_decode($body, true);
 
     if (!is_array($data)) {
-        return null;
+        return false;
     }
 
-    // Cache the result for 12 hours (43200 seconds)
-    set_transient($cache_key, $data, 12 * HOUR_IN_SECONDS);
+    // Extract just the boolean we need
+    $is_published = !empty($data['published_to_podcast']);
 
-    return $data;
+    // Cache the boolean for 12 hours
+    set_transient($cache_key, $is_published, 12 * HOUR_IN_SECONDS);
+
+    return $is_published;
 }
 
 /**
@@ -124,11 +133,8 @@ function t3a_should_show_podcast_subscribe($post_id = null) {
         $permalink = str_replace($host, '80000hours.org', $permalink);
     }
 
-    // Fetch the narration status from the API
-    $status = t3a_get_narration_status($permalink);
-
     // Check if the narration is published to the podcast
-    return is_array($status) && !empty($status['published_to_podcast']);
+    return t3a_is_published_to_podcast($permalink);
 }
 
 function type_3_player($atts) {

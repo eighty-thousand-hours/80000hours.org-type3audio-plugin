@@ -37,9 +37,9 @@ function t3a_get_podcast_subscribe_urls() {
 function t3a_is_published_to_podcast($source_url) {
     // Create a readable cache key from the URL path only
     $key_prefix = 'pubbed_to_narrations_podcast_';
-    $key_suffix = preg_replace('#^https?://[^/]+#', '', $source_url);  // Strip protocol + domain
-    $key_suffix = str_replace('/', '_', $key_suffix);                   // Replace / with _
-    $key_suffix = trim($key_suffix, '_');                               // Remove leading/trailing _
+    $key_suffix = wp_parse_url($source_url, PHP_URL_PATH) ?: '';
+    $key_suffix = str_replace('/', '_', $key_suffix);
+    $key_suffix = trim($key_suffix, '_');
 
     // WordPress transient keys max out at 172 chars; fall back to MD5 hash if too long
     if (strlen($key_prefix . $key_suffix) > 172) {

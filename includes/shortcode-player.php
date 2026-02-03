@@ -35,7 +35,7 @@ function t3a_get_podcast_subscribe_urls() {
  * @return bool True if published to podcast, false otherwise.
  */
 function t3a_is_published_to_podcast($source_url) {
-    // Create a readable cache key from the URL path only
+    // Create a cache key from the URL path
     $key_prefix = 'pubbed_to_narrations_podcast_';
     $key_suffix = wp_parse_url($source_url, PHP_URL_PATH) ?: '';
     $key_suffix = str_replace('/', '_', $key_suffix);
@@ -47,10 +47,10 @@ function t3a_is_published_to_podcast($source_url) {
     }
     $cache_key = $key_prefix . $key_suffix;
 
-    // Try to get cached data (note: must check for null, not false, since false is a valid cached value)
+    // Try to get cached data (we store 'yes'/'no' strings since get_transient returns false on miss)
     $cached_data = get_transient($cache_key);
-    if ($cached_data !== null && $cached_data !== false) {
-        return $cached_data;
+    if ($cached_data !== false) {
+        return $cached_data === 'yes';
     }
 
     // Determine the API base URL (same logic as in manage-narration-metabox.php)
@@ -89,8 +89,8 @@ function t3a_is_published_to_podcast($source_url) {
     // Extract just the boolean we need
     $is_published = !empty($data['published_to_podcast']);
 
-    // Cache the boolean for 12 hours
-    set_transient($cache_key, $is_published, 12 * HOUR_IN_SECONDS);
+    // Cache as 'yes'/'no' string for 12 hours (can't use boolean since get_transient returns false on miss)
+    set_transient($cache_key, $is_published ? 'yes' : 'no', 12 * HOUR_IN_SECONDS);
 
     return $is_published;
 }

@@ -35,8 +35,11 @@ function t3a_get_podcast_subscribe_urls() {
  * @return array|null The narration status data or null on failure.
  */
 function t3a_get_narration_status($source_url) {
-    // Create a cache key based on the source URL
-    $cache_key = 't3a_narration_status_' . md5($source_url);
+    // Create a readable cache key from the URL path only
+    $key_suffix = preg_replace('#^https?://[^/]+#', '', $source_url);  // Strip protocol + domain
+    $key_suffix = str_replace('/', '_', $key_suffix);                   // Replace / with _
+    $key_suffix = trim($key_suffix, '_');                               // Remove leading/trailing _
+    $cache_key = 't3astatus_' . $key_suffix;
 
     // Try to get cached data
     $cached_data = get_transient($cache_key);

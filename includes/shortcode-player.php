@@ -69,13 +69,15 @@ function t3a_is_published_to_podcast($source_url) {
         ),
     ));
 
-    // Handle errors - don't cache failures, return false
+    // Handle errors - cache failures for 5 minutes to avoid hammering the API
     if (is_wp_error($response)) {
+        set_transient($cache_key, 'no', 5 * MINUTE_IN_SECONDS);
         return false;
     }
 
     $status_code = wp_remote_retrieve_response_code($response);
     if ($status_code !== 200) {
+        set_transient($cache_key, 'no', 5 * MINUTE_IN_SECONDS);
         return false;
     }
 
@@ -83,6 +85,7 @@ function t3a_is_published_to_podcast($source_url) {
     $data = json_decode($body, true);
 
     if (!is_array($data)) {
+        set_transient($cache_key, 'no', 5 * MINUTE_IN_SECONDS);
         return false;
     }
 
@@ -102,27 +105,25 @@ function t3a_is_published_to_podcast($source_url) {
  * @return bool True if subscribe buttons should be shown, false otherwise.
  */
 function t3a_should_show_podcast_subscribe($post_id = null) {
-    if (!$post_id) {
+    if ($post_id) {
+        $the_post = get_post($post_id);
+    } else {
         global $post;
-        if (!$post) {
-            return false;
-        }
-        $post_id = $post->ID;
+        $the_post = $post;
     }
 
-    $post = get_post($post_id);
-    if (!$post) {
+    if (!$the_post) {
         return false;
     }
 
     // Check if the post type is eligible for narrations
     $eligible_post_types = array('skill_set', 'ai_career_guide_page', 'career_profile', 'problem_profile', 'article');
-    if (!in_array($post->post_type, $eligible_post_types, true)) {
+    if (!in_array($the_post->post_type, $eligible_post_types, true)) {
         return false;
     }
 
     // Get the permalink
-    $permalink = get_permalink($post);
+    $permalink = get_permalink($the_post);
     if (!$permalink) {
         return false;
     }
@@ -262,9 +263,9 @@ function type_3_player($atts) {
 
     // Add podcast subscribe URLs if applicable
     if ($show_subscribe && !empty($subscribe_urls)) {
-        foreach ($subscribe_urls as $platform => $url) {
+        foreach ($subscribe_urls as $platform => $subscribe_url) {
             $html .= '
-            subscribe-url--' . esc_attr($platform) . '="' . esc_attr($url) . '"';
+            subscribe-url--' . esc_attr($platform) . '="' . esc_attr($subscribe_url) . '"';
         }
     }
 

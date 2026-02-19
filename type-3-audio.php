@@ -30,26 +30,12 @@ define('T3A_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('T3A_PLUGIN_URL', plugins_url('', __FILE__));
 
 /*
- * ╔═══════════════════════════════════════════════════════════════════════════╗
- * ║                    ⚠️  VERSION BUMPING REQUIRED  ⚠️                        ║
- * ║                                                                           ║
- * ║  DUAL VERSION SYSTEM:                                                     ║
- * ║  - T3A_VERSION: Tracks upstream Type 3 Audio plugin version (rarely bump)║
- * ║  - T3A_80K_ASSET_REV: 80k-specific asset revision (bump for CSS/JS changes)
- * ║                                                                           ║
- * ║  When you modify assets/css/player.css or assets/js/*.js:                ║
- * ║                                                                           ║
- * ║  1. Bump T3A_80K_ASSET_REV below (increment: 1 → 2 → 3...)              ║
- * ║  2. DO NOT bump T3A_VERSION (only when syncing from upstream)            ║
- * ║                                                                           ║
- * ║  Cache busting uses: T3A_VERSION . '.' . T3A_80K_ASSET_REV              ║
- * ║  Example: 1.7.1 → 1.7.2 → 1.7.3 (80k changes) → 1.8.1 (upstream update) ║
- * ║                                                                           ║
- * ║  Assets that use this for cache busting:                                 ║
- * ║  - assets/css/player.css (via shortcode-player.php)                      ║
- * ║  - assets/js/player-enhancements.js (via shortcode-player.php)           ║
- * ║  - assets/js/manage-narration.js (via manage-narration-metabox.php)      ║
- * ╚═══════════════════════════════════════════════════════════════════════════╝
+ * VERSION CONSTANTS:
+ * - T3A_VERSION: Tracks upstream Type 3 Audio plugin version (bump when syncing from upstream)
+ * - T3A_80K_ASSET_REV: 80k-specific asset revision for cache busting JS files
+ *
+ * Note: CSS is injected inline (no cache busting needed). Only bump T3A_80K_ASSET_REV
+ * when modifying assets/js/*.js files (player-enhancements.js, manage-narration.js).
  */
 define('T3A_VERSION', '1.7');           // Upstream Type 3 Audio version
 define('T3A_80K_ASSET_REV', '1');       // 80k-specific asset revision

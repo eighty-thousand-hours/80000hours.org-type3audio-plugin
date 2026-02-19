@@ -9,7 +9,10 @@ if (!defined('ABSPATH')) {
 
 function t3a_enqueue_scripts() {
     wp_register_script('type-3-player', 'https://embed.type3.audio/player.js', array(), '1.0.0', true);
-    wp_register_style('type-3-player-styles', T3A_PLUGIN_URL . '/assets/css/player.css', array(), T3A_VERSION . '.' . T3A_80K_ASSET_REV);
+    // Note: CSS is no longer registered/enqueued here. It's now injected inline in the shortcode.
+    // This fixes an issue introduced in WordPress 6.9 (Dec 2025) where the new "on-demand"
+    // block styles loading system caused conditionally enqueued stylesheets (enqueued inside
+    // shortcodes) to be ignored or loaded too late. Inline injection ensures styles always apply.
 }
 
 add_action('wp_enqueue_scripts', 't3a_enqueue_scripts');
@@ -146,8 +149,11 @@ function type_3_player($atts) {
     $t3a_primary_font = "'museo-sans','Helvetica Neue',Helvetica,Arial,sans-serif";
     $t3a_secondary_font = "'proxima-nova',Arial,sans-serif";
 
-    // Note: All player CSS is now in assets/css/player.css
-    // (Previously was in theme LESS file, but moved to plugin for easier fork maintenance)
+    // Note: Player CSS is maintained in assets/css/player.css and injected inline below.
+    // Prior to WordPress 6.9, we enqueued the stylesheet conditionally when this shortcode ran.
+    // WordPress 6.9 (Dec 2025) introduced "on-demand" block styles loading which broke that
+    // approach - by the time shortcodes execute, WP has already decided what CSS to load.
+    // Inline injection ensures styles are present regardless of WP's loading decisions.
 
     // Define default attributes
     $default_atts = array(
@@ -170,9 +176,6 @@ function type_3_player($atts) {
 
     wp_enqueue_script('type-3-player');
     wp_script_add_data('type-3-player', array('type', 'crossorigin'), array('module', ''));
-
-    // Enqueue player styles
-    wp_enqueue_style('type-3-player-styles');
 
     // Add async attribute to <script> tag so that it's not blocking loading our
     // deferred scripts.
@@ -225,7 +228,19 @@ function type_3_player($atts) {
         $min_height = '75px';
     endif;
 
-    $html = '<div style="width: 100%; min-height: ' . esc_attr($min_height) . '; clear: both;" class="' . esc_attr($class) . '">';
+    // Inject CSS inline (only once per page, even if multiple players)
+    static $css_injected = false;
+    $inline_css = '';
+    if (!$css_injected) {
+        $css_file = T3A_PLUGIN_PATH . 'assets/css/player.css';
+        if (file_exists($css_file)) {
+            $css_content = file_get_contents($css_file);
+            $inline_css = '<style id="type-3-player-styles">' . $css_content . '</style>';
+            $css_injected = true;
+        }
+    }
+
+    $html = $inline_css . '<div style="width: 100%; min-height: ' . esc_attr($min_height) . '; clear: both;" class="' . esc_attr($class) . '">';
 
     // Check if we should show podcast subscribe buttons. The t3a_should_show_podcast_subscribe() function
     // will use the global post if $post_id is not provided, so we can call it directly.

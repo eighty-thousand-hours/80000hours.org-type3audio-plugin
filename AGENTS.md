@@ -36,16 +36,17 @@
 
 ### ⚠️ CRITICAL: Version Bumping for Cache Busting
 
-**ALWAYS bump the asset revision when modifying these files:**
-- `assets/css/player.css`
+**ALWAYS bump the asset revision when modifying these JavaScript files:**
 - `assets/js/player-enhancements.js`
 - `assets/js/manage-narration.js`
 
-**Why:** These assets are enqueued with `T3A_VERSION . '.' . T3A_80K_ASSET_REV` as the cache-busting query parameter. Without a version bump, browsers will serve stale cached files even after deployment.
+**Note:** CSS files (`assets/css/player.css`) are injected inline and do NOT require version bumping.
+
+**Why:** JavaScript files are enqueued with `T3A_VERSION . '.' . T3A_80K_ASSET_REV` as the cache-busting query parameter. Without a version bump, browsers will serve stale cached JS files even after deployment.
 
 **Dual Version System:**
 - `T3A_VERSION` (e.g., `1.7`) - Tracks the upstream Type 3 Audio plugin version. **Only bump when syncing from upstream.**
-- `T3A_80K_ASSET_REV` (e.g., `1`, `2`, `3`...) - 80k-specific asset revision. **Bump this for all CSS/JS changes.**
+- `T3A_80K_ASSET_REV` (e.g., `1`, `2`, `3`...) - 80k-specific asset revision. **Bump this for JS changes only.**
 
 **How to bump the asset revision:**
 1. Open `type-3-audio.php`
@@ -57,6 +58,6 @@
 A **pre-commit hook** is included to automatically enforce version bumping:
 
 - **Installation:** Run `bash hooks/install.sh` once after cloning the repo
-- **What it does:** Blocks commits that modify ANY `.css` or `.js` files in `assets/` without bumping `T3A_80K_ASSET_REV`
+- **What it does:** Blocks commits that modify `.js` files in `assets/` without bumping `T3A_80K_ASSET_REV`
 - **Bypass:** Use `git commit --no-verify` if you need to skip the check (not recommended)
 - **Maintenance:** The hook is stored in `hooks/pre-commit` (version controlled) and copied to `.git/hooks/` during installation

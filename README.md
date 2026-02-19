@@ -37,11 +37,12 @@ Then deploy that change to the WordPress site.
 
 ## Versioning
 
-- **Asset files** (`assets/css/*.css`, `assets/js/*.js`) require bumping `T3A_80K_ASSET_REV` in `type-3-audio.php` after any modifications
+- **JavaScript files** (`assets/js/*.js`) require bumping `T3A_80K_ASSET_REV` in `type-3-audio.php` after any modifications
+- **CSS files** (`assets/css/*.css`) are injected inline (no version bumping needed)
 - **Dual version system:**
   - `T3A_VERSION`: Upstream plugin version - **only bump when syncing from upstream**
-  - `T3A_80K_ASSET_REV`: 80k asset revision - **bump this for all CSS/JS changes** (1 → 2 → 3...)
-- **Why:** Cache busting uses `T3A_VERSION . '.' . T3A_80K_ASSET_REV` (e.g., `1.7.1`)
+  - `T3A_80K_ASSET_REV`: 80k asset revision - **bump this for JS changes only** (1 → 2 → 3...)
+- **Why:** JavaScript cache busting uses `T3A_VERSION . '.' . T3A_80K_ASSET_REV` (e.g., `1.7.1`)
 
 ## Upstream Repository
 

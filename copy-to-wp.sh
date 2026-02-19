@@ -72,7 +72,7 @@ cp -r "$REPO_DIR" "$WP_PLUGINS_DIR/$PLUGIN_NAME"
 # Clean up development files
 echo -e "${YELLOW}→${NC} Cleaning up development files..."
 cd "$WP_PLUGINS_DIR/$PLUGIN_NAME"
-rm -rf .git .gitignore .claude AGENTS.md build deploy copy-to-wp.sh
+rm -rf .git .gitignore .claude AGENTS.md build deploy copy-to-wp.sh type-3-audio.zip
 
 # Rename main plugin file if needed
 if [ -f "type-3-audio.php" ]; then

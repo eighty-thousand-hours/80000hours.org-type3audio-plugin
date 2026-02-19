@@ -4,15 +4,12 @@
 
 ## Project Structure & Module Organization
 - `type-3-audio.php` is the WordPress plugin bootstrap; it wires core hooks and pulls in the modules under `includes/`.
-- `includes/` groups feature-specific files: `admin-settings.php` renders the settings page, `block-editor.php` integrates the block UI, `regeneration.php` handles audio regeneration requests, and `shortcode-player.php` exposes the front-end player.
-- `build` is a Bash helper that zips the plugin excluding `.git`; it writes `type-3-audio.zip`, which should be treated as a build artifact and regenerated rather than edited.
-- `deploy` runs the build script and pushes the current `main` branch; use it from a clean tree to publish.
+- `includes/` groups feature-specific files: `admin-settings.php` renders the settings page, `regeneration.php` handles audio regeneration requests, and `shortcode-player.php` exposes the front-end player.
+- `copy-to-wp.sh` deploys the plugin to the local WordPress installation for testing.
 
 ## Build, Test, and Development Commands
-- `bash build` — packages the plugin into `type-3-audio.zip` for release or manual installation.
-- `sh deploy` — rebuilds the archive and pushes `main`; confirm tests first.
+- `bash copy-to-wp.sh` — deploys the plugin to local WordPress for testing.
 - `php -l type-3-audio.php includes/*.php` — quick syntax lint before committing.
-- `wp plugin deactivate type-3-audio && wp plugin activate type-3-audio` — reloads the plugin on a local wp-env/Local install after code changes.
 
 ## Coding Style & Naming Conventions
 - Follow 4-space indentation and PSR-12-aligned brace placement already used in `includes/*.php`.
@@ -30,8 +27,9 @@
 - PRs should include: overview of the change, manual test steps/results, screenshots or screen recordings for UI updates, and notes on deployment impact.
 
 ## Release & Deployment
-- Before running `sh deploy`, bump the plugin header version in `type-3-audio.php` and any readme changelog entries.
-- Validate the generated `type-3-audio.zip` by installing it on a staging WordPress site; smoke test settings, regeneration, and playback before marking the release complete.
+- Deploy to local WordPress using `bash copy-to-wp.sh` for testing.
+- After testing locally, commit changes and deploy the WordPress repo to staging/production.
+- The plugin is maintained in this fork repo and deployed via the WordPress site repo.
 
 ### Asset Management
 

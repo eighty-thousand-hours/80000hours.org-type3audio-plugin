@@ -54,46 +54,35 @@ function t3a_enqueue_manage_narration_metabox_assets($hook_suffix) {
     wp_enqueue_script('wp-date');
 
     // Inline the manage-narration.js script instead of enqueueing it
-    // Using static variable to ensure it's only injected once per page
-    static $script_injected = false;
-    if (!$script_injected) {
-        $date_format = get_option('date_format', 'F j, Y');
-        $time_format = get_option('time_format', 'g:i a');
-        $strings = t3a_get_manage_narration_strings();
+    // Always inject to avoid issues with WordPress calling hook multiple times during rendering
+    $date_format = get_option('date_format', 'F j, Y');
+    $time_format = get_option('time_format', 'g:i a');
+    $strings = t3a_get_manage_narration_strings();
 
-        // Output the localized data as inline script
-        $localized_data = array(
-            'strings' => $strings,
-            'formats' => array(
-                'dateTime' => trim($date_format . ' ' . $time_format),
-            ),
-        );
+    // Output the localized data as inline script
+    $localized_data = array(
+        'strings' => $strings,
+        'formats' => array(
+            'dateTime' => trim($date_format . ' ' . $time_format),
+        ),
+    );
 
-        $script_file = T3A_PLUGIN_PATH . 'assets/js/manage-narration.js';
-        if (is_readable($script_file)) {
-            $script_content = file_get_contents($script_file);
-            if ($script_content !== false) {
-                // Minify: remove comments and excessive whitespace
-                $script_content = preg_replace('/\/\*[\s\S]*?\*\//', '', $script_content);  // Remove /* */ comments
-                $script_content = preg_replace('/^\s*\/\/.*$/m', '', $script_content);      // Remove // comments
-                $script_content = preg_replace('/\s+/', ' ', $script_content);              // Collapse whitespace
+    $script_file = T3A_PLUGIN_PATH . 'assets/js/manage-narration.js';
+    if (is_readable($script_file)) {
+        $script_content = file_get_contents($script_file);
+        if ($script_content !== false) {
+            // Minify: remove comments and excessive whitespace
+            $script_content = preg_replace('/\/\*[\s\S]*?\*\//', '', $script_content);  // Remove /* */ comments
+            $script_content = preg_replace('/^\s*\/\/.*$/m', '', $script_content);      // Remove // comments
+            $script_content = preg_replace('/\s+/', ' ', $script_content);              // Collapse whitespace
 
-                if ($script_content === null) {
-                    error_log('TYPE III AUDIO: preg_replace error minifying manage-narration.js');
-                } else {
-                    // Output the localized data followed by the script
-                    echo '<script>';
-                    echo 'window.t3aManageNarration = ' . wp_json_encode($localized_data) . ';';
-                    echo ' ' . trim($script_content);
-                    echo '</script>';
-
-                    $script_injected = true;
-                }
-            } else {
-                error_log('TYPE III AUDIO: Failed to read manage-narration.js');
+            if ($script_content !== null) {
+                // Output the localized data followed by the script
+                echo '<script>';
+                echo 'window.t3aManageNarration = ' . wp_json_encode($localized_data) . ';';
+                echo ' ' . trim($script_content);
+                echo '</script>';
             }
-        } else {
-            error_log('TYPE III AUDIO: manage-narration.js is not readable at ' . $script_file);
         }
     }
 }

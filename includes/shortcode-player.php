@@ -187,30 +187,20 @@ function type_3_player($atts) {
     );
 
     // Inline player enhancements script (analytics, scroll behavior, heading filters)
-    // Using static variable to ensure it's only injected once per page
-    static $enhancements_injected = false;
+    // Always inject to avoid issues with WordPress calling shortcode multiple times during rendering
     $inline_enhancements = '';
-    if (!$enhancements_injected) {
-        $enhancements_file = T3A_PLUGIN_PATH . 'assets/js/player-enhancements.js';
-        if (is_readable($enhancements_file)) {
-            $enhancements_content = file_get_contents($enhancements_file);
-            if ($enhancements_content !== false) {
-                // Minify: remove comments and excessive whitespace
-                $enhancements_content = preg_replace('/\/\*[\s\S]*?\*\//', '', $enhancements_content); // Remove /* */ comments
-                $enhancements_content = preg_replace('/^\s*\/\/.*$/m', '', $enhancements_content);      // Remove // comments
-                $enhancements_content = preg_replace('/\s+/', ' ', $enhancements_content);              // Collapse whitespace
+    $enhancements_file = T3A_PLUGIN_PATH . 'assets/js/player-enhancements.js';
+    if (is_readable($enhancements_file)) {
+        $enhancements_content = file_get_contents($enhancements_file);
+        if ($enhancements_content !== false) {
+            // Minify: remove comments and excessive whitespace
+            $enhancements_content = preg_replace('/\/\*[\s\S]*?\*\//', '', $enhancements_content); // Remove /* */ comments
+            $enhancements_content = preg_replace('/^\s*\/\/.*$/m', '', $enhancements_content);      // Remove // comments
+            $enhancements_content = preg_replace('/\s+/', ' ', $enhancements_content);              // Collapse whitespace
 
-                if ($enhancements_content === null) {
-                    error_log('TYPE III AUDIO: preg_replace error minifying player-enhancements.js');
-                } else {
-                    $inline_enhancements = '<script>' . trim($enhancements_content) . '</script>';
-                    $enhancements_injected = true;
-                }
-            } else {
-                error_log('TYPE III AUDIO: Failed to read player-enhancements.js');
+            if ($enhancements_content !== null) {
+                $inline_enhancements = '<script>' . trim($enhancements_content) . '</script>';
             }
-        } else {
-            error_log('TYPE III AUDIO: player-enhancements.js is not readable at ' . $enhancements_file);
         }
     }
 
@@ -247,29 +237,20 @@ function type_3_player($atts) {
         $min_height = '75px';
     endif;
 
-    // Inject CSS and JS inline (only once per page, even if multiple players)
-    static $css_injected = false;
+    // Inject CSS inline
+    // Always inject to avoid issues with WordPress calling shortcode multiple times during rendering
     $inline_css = '';
-    if (!$css_injected) {
-        $css_file = T3A_PLUGIN_PATH . 'assets/css/player.css';
-        if (is_readable($css_file)) {
-            $css_content = file_get_contents($css_file);
-            if ($css_content !== false) {
-                // Minify: remove comments and excessive whitespace
-                $css_content = preg_replace('/\/\*[\s\S]*?\*\//', '', $css_content);
-                $css_content = preg_replace('/\s+/', ' ', $css_content);
+    $css_file = T3A_PLUGIN_PATH . 'assets/css/player.css';
+    if (is_readable($css_file)) {
+        $css_content = file_get_contents($css_file);
+        if ($css_content !== false) {
+            // Minify: remove comments and excessive whitespace
+            $css_content = preg_replace('/\/\*[\s\S]*?\*\//', '', $css_content);
+            $css_content = preg_replace('/\s+/', ' ', $css_content);
 
-                if ($css_content === null) {
-                    error_log('TYPE III AUDIO: preg_replace error minifying player.css');
-                } else {
-                    $inline_css = '<style id="type-3-player-styles">' . trim($css_content) . '</style>';
-                    $css_injected = true;
-                }
-            } else {
-                error_log('TYPE III AUDIO: Failed to read player.css');
+            if ($css_content !== null) {
+                $inline_css = '<style id="type-3-player-styles">' . trim($css_content) . '</style>';
             }
-        } else {
-            error_log('TYPE III AUDIO: player.css is not readable at ' . $css_file);
         }
     }
 
@@ -330,8 +311,9 @@ function type_3_player($atts) {
 
     if (!t3a_is_hardcoded_mp3_url($atts)) {
         if (!t3a_is_post_published()) {
-            $html = do_shortcode("[well margin='!tw--my-2']The audio player will display here when this post is published on the live site.[/well]");
-            return $html;
+            // Preserve inline CSS/JS even when showing placeholder message
+            $placeholder = do_shortcode("[well margin='!tw--my-2']The audio player will display here when this post is published on the live site.[/well]");
+            return $inline_css . $inline_enhancements . $placeholder;
         }
     }
 

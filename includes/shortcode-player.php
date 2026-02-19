@@ -192,10 +192,19 @@ function type_3_player($atts) {
     $inline_enhancements = '';
     if (!$enhancements_injected) {
         $enhancements_file = T3A_PLUGIN_PATH . 'assets/js/player-enhancements.js';
-        if (file_exists($enhancements_file)) {
+        if (is_readable($enhancements_file)) {
             $enhancements_content = file_get_contents($enhancements_file);
-            $inline_enhancements = '<script>' . $enhancements_content . '</script>';
-            $enhancements_injected = true;
+            if ($enhancements_content !== false) {
+                // Minify: remove single-line comments and excessive whitespace
+                $enhancements_content = preg_replace('/^\s*\/\/.*$/m', '', $enhancements_content);
+                $enhancements_content = preg_replace('/\s+/', ' ', $enhancements_content);
+                $inline_enhancements = '<script>' . trim($enhancements_content) . '</script>';
+                $enhancements_injected = true;
+            } else {
+                error_log('TYPE III AUDIO: Failed to read player-enhancements.js');
+            }
+        } else {
+            error_log('TYPE III AUDIO: player-enhancements.js is not readable at ' . $enhancements_file);
         }
     }
 
@@ -237,10 +246,19 @@ function type_3_player($atts) {
     $inline_css = '';
     if (!$css_injected) {
         $css_file = T3A_PLUGIN_PATH . 'assets/css/player.css';
-        if (file_exists($css_file)) {
+        if (is_readable($css_file)) {
             $css_content = file_get_contents($css_file);
-            $inline_css = '<style id="type-3-player-styles">' . $css_content . '</style>';
-            $css_injected = true;
+            if ($css_content !== false) {
+                // Minify: remove comments and excessive whitespace
+                $css_content = preg_replace('/\/\*[\s\S]*?\*\//', '', $css_content);
+                $css_content = preg_replace('/\s+/', ' ', $css_content);
+                $inline_css = '<style id="type-3-player-styles">' . trim($css_content) . '</style>';
+                $css_injected = true;
+            } else {
+                error_log('TYPE III AUDIO: Failed to read player.css');
+            }
+        } else {
+            error_log('TYPE III AUDIO: player.css is not readable at ' . $css_file);
         }
     }
 

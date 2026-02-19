@@ -70,16 +70,25 @@ function t3a_enqueue_manage_narration_metabox_assets($hook_suffix) {
         );
 
         $script_file = T3A_PLUGIN_PATH . 'assets/js/manage-narration.js';
-        if (file_exists($script_file)) {
+        if (is_readable($script_file)) {
             $script_content = file_get_contents($script_file);
+            if ($script_content !== false) {
+                // Minify: remove single-line comments and excessive whitespace
+                $script_content = preg_replace('/^\s*\/\/.*$/m', '', $script_content);
+                $script_content = preg_replace('/\s+/', ' ', $script_content);
 
-            // Output the localized data followed by the script
-            echo '<script>';
-            echo 'window.t3aManageNarration = ' . wp_json_encode($localized_data) . ';';
-            echo "\n" . $script_content;
-            echo '</script>';
+                // Output the localized data followed by the script
+                echo '<script>';
+                echo 'window.t3aManageNarration = ' . wp_json_encode($localized_data) . ';';
+                echo ' ' . trim($script_content);
+                echo '</script>';
 
-            $script_injected = true;
+                $script_injected = true;
+            } else {
+                error_log('TYPE III AUDIO: Failed to read manage-narration.js');
+            }
+        } else {
+            error_log('TYPE III AUDIO: manage-narration.js is not readable at ' . $script_file);
         }
     }
 }

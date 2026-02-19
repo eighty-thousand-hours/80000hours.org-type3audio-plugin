@@ -195,11 +195,17 @@ function type_3_player($atts) {
         if (is_readable($enhancements_file)) {
             $enhancements_content = file_get_contents($enhancements_file);
             if ($enhancements_content !== false) {
-                // Minify: remove single-line comments and excessive whitespace
-                $enhancements_content = preg_replace('/^\s*\/\/.*$/m', '', $enhancements_content);
-                $enhancements_content = preg_replace('/\s+/', ' ', $enhancements_content);
-                $inline_enhancements = '<script>' . trim($enhancements_content) . '</script>';
-                $enhancements_injected = true;
+                // Minify: remove comments and excessive whitespace
+                $enhancements_content = preg_replace('/\/\*[\s\S]*?\*\//', '', $enhancements_content); // Remove /* */ comments
+                $enhancements_content = preg_replace('/^\s*\/\/.*$/m', '', $enhancements_content);      // Remove // comments
+                $enhancements_content = preg_replace('/\s+/', ' ', $enhancements_content);              // Collapse whitespace
+
+                if ($enhancements_content === null) {
+                    error_log('TYPE III AUDIO: preg_replace error minifying player-enhancements.js');
+                } else {
+                    $inline_enhancements = '<script>' . trim($enhancements_content) . '</script>';
+                    $enhancements_injected = true;
+                }
             } else {
                 error_log('TYPE III AUDIO: Failed to read player-enhancements.js');
             }
@@ -252,8 +258,13 @@ function type_3_player($atts) {
                 // Minify: remove comments and excessive whitespace
                 $css_content = preg_replace('/\/\*[\s\S]*?\*\//', '', $css_content);
                 $css_content = preg_replace('/\s+/', ' ', $css_content);
-                $inline_css = '<style id="type-3-player-styles">' . trim($css_content) . '</style>';
-                $css_injected = true;
+
+                if ($css_content === null) {
+                    error_log('TYPE III AUDIO: preg_replace error minifying player.css');
+                } else {
+                    $inline_css = '<style id="type-3-player-styles">' . trim($css_content) . '</style>';
+                    $css_injected = true;
+                }
             } else {
                 error_log('TYPE III AUDIO: Failed to read player.css');
             }

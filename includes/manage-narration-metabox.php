@@ -73,17 +73,22 @@ function t3a_enqueue_manage_narration_metabox_assets($hook_suffix) {
         if (is_readable($script_file)) {
             $script_content = file_get_contents($script_file);
             if ($script_content !== false) {
-                // Minify: remove single-line comments and excessive whitespace
-                $script_content = preg_replace('/^\s*\/\/.*$/m', '', $script_content);
-                $script_content = preg_replace('/\s+/', ' ', $script_content);
+                // Minify: remove comments and excessive whitespace
+                $script_content = preg_replace('/\/\*[\s\S]*?\*\//', '', $script_content);  // Remove /* */ comments
+                $script_content = preg_replace('/^\s*\/\/.*$/m', '', $script_content);      // Remove // comments
+                $script_content = preg_replace('/\s+/', ' ', $script_content);              // Collapse whitespace
 
-                // Output the localized data followed by the script
-                echo '<script>';
-                echo 'window.t3aManageNarration = ' . wp_json_encode($localized_data) . ';';
-                echo ' ' . trim($script_content);
-                echo '</script>';
+                if ($script_content === null) {
+                    error_log('TYPE III AUDIO: preg_replace error minifying manage-narration.js');
+                } else {
+                    // Output the localized data followed by the script
+                    echo '<script>';
+                    echo 'window.t3aManageNarration = ' . wp_json_encode($localized_data) . ';';
+                    echo ' ' . trim($script_content);
+                    echo '</script>';
 
-                $script_injected = true;
+                    $script_injected = true;
+                }
             } else {
                 error_log('TYPE III AUDIO: Failed to read manage-narration.js');
             }

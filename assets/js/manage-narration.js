@@ -2,8 +2,7 @@
  * TYPE III AUDIO - Manage Narration UI
  * Admin interface for managing post narrations in WordPress
  *
- * IMPORTANT: After modifying this file, bump T3A_80K_ASSET_REV in type-3-audio.php
- * for cache busting. See AGENTS.md for details.
+ * This file is injected inline in the admin post editor for eligible post types.
  */
 
 'use strict';

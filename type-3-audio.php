@@ -30,15 +30,12 @@ define('T3A_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('T3A_PLUGIN_URL', plugins_url('', __FILE__));
 
 /*
- * VERSION CONSTANTS:
+ * VERSION CONSTANT:
  * - T3A_VERSION: Tracks upstream Type 3 Audio plugin version (bump when syncing from upstream)
- * - T3A_80K_ASSET_REV: 80k-specific asset revision for cache busting JS files
  *
- * Note: CSS is injected inline (no cache busting needed). Only bump T3A_80K_ASSET_REV
- * when modifying assets/js/*.js files (player-enhancements.js, manage-narration.js).
+ * Note: All CSS and JS assets are injected inline (no cache busting needed).
  */
 define('T3A_VERSION', '1.7');           // Upstream Type 3 Audio version
-define('T3A_80K_ASSET_REV', '1');       // 80k-specific asset revision
 
 // Include required files
 require_once T3A_PLUGIN_PATH . 'includes/shortcode-player.php';

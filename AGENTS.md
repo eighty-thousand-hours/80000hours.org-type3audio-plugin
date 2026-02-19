@@ -10,10 +10,9 @@
 
 ## Build, Test, and Development Commands
 - `bash build` — packages the plugin into `type-3-audio.zip` for release or manual installation.
-- `sh deploy` — rebuilds the archive and pushes `main`; confirm tests and version bumps first.
+- `sh deploy` — rebuilds the archive and pushes `main`; confirm tests first.
 - `php -l type-3-audio.php includes/*.php` — quick syntax lint before committing.
 - `wp plugin deactivate type-3-audio && wp plugin activate type-3-audio` — reloads the plugin on a local wp-env/Local install after code changes.
-- `bash hooks/install.sh` — installs Git hooks (run once after cloning the repo).
 
 ## Coding Style & Naming Conventions
 - Follow 4-space indentation and PSR-12-aligned brace placement already used in `includes/*.php`.
@@ -34,30 +33,11 @@
 - Before running `sh deploy`, bump the plugin header version in `type-3-audio.php` and any readme changelog entries.
 - Validate the generated `type-3-audio.zip` by installing it on a staging WordPress site; smoke test settings, regeneration, and playback before marking the release complete.
 
-### ⚠️ CRITICAL: Version Bumping for Cache Busting
+### Asset Management
 
-**ALWAYS bump the asset revision when modifying these JavaScript files:**
-- `assets/js/player-enhancements.js`
-- `assets/js/manage-narration.js`
+All CSS and JavaScript assets are **injected inline** when needed:
+- `assets/css/player.css` - Injected when the `[type3_audio_player]` shortcode is used
+- `assets/js/player-enhancements.js` - Injected with the player (analytics, scroll behavior, heading filters)
+- `assets/js/manage-narration.js` - Injected in admin post editor for eligible post types
 
-**Note:** CSS files (`assets/css/player.css`) are injected inline and do NOT require version bumping.
-
-**Why:** JavaScript files are enqueued with `T3A_VERSION . '.' . T3A_80K_ASSET_REV` as the cache-busting query parameter. Without a version bump, browsers will serve stale cached JS files even after deployment.
-
-**Dual Version System:**
-- `T3A_VERSION` (e.g., `1.7`) - Tracks the upstream Type 3 Audio plugin version. **Only bump when syncing from upstream.**
-- `T3A_80K_ASSET_REV` (e.g., `1`, `2`, `3`...) - 80k-specific asset revision. **Bump this for JS changes only.**
-
-**How to bump the asset revision:**
-1. Open `type-3-audio.php`
-2. Update the `T3A_80K_ASSET_REV` constant definition → increment the number (`1` → `2` → `3`...)
-3. **Do NOT** bump `T3A_VERSION` or the plugin header version unless syncing from upstream
-
-### Git Hook Protection
-
-A **pre-commit hook** is included to automatically enforce version bumping:
-
-- **Installation:** Run `bash hooks/install.sh` once after cloning the repo
-- **What it does:** Blocks commits that modify `.js` files in `assets/` without bumping `T3A_80K_ASSET_REV`
-- **Bypass:** Use `git commit --no-verify` if you need to skip the check (not recommended)
-- **Maintenance:** The hook is stored in `hooks/pre-commit` (version controlled) and copied to `.git/hooks/` during installation
+**No cache busting needed:** Inline assets are always fresh, eliminating stale cache issues.

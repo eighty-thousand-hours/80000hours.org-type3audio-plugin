@@ -2,8 +2,7 @@
  * TYPE III AUDIO Player Enhancements
  * Custom analytics tracking, scroll behavior, and heading filters for 80,000 Hours
  *
- * IMPORTANT: After modifying this file, bump T3A_80K_ASSET_REV in type-3-audio.php
- * for cache busting. See AGENTS.md for details.
+ * This file is injected inline when the [type3_audio_player] shortcode is used.
  */
 
 (function() {

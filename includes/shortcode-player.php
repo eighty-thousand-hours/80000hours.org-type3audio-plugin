@@ -186,14 +186,18 @@ function type_3_player($atts) {
         'async'
     );
 
-    // Enqueue custom player enhancements (analytics, scroll behavior, heading filters)
-    wp_enqueue_script(
-        'type-3-player-enhancements',
-        T3A_PLUGIN_URL . '/assets/js/player-enhancements.js',
-        array(), // No dependencies
-        T3A_VERSION . '.' . T3A_80K_ASSET_REV,
-        true // Load in footer
-    );
+    // Inline player enhancements script (analytics, scroll behavior, heading filters)
+    // Using static variable to ensure it's only injected once per page
+    static $enhancements_injected = false;
+    $inline_enhancements = '';
+    if (!$enhancements_injected) {
+        $enhancements_file = T3A_PLUGIN_PATH . 'assets/js/player-enhancements.js';
+        if (file_exists($enhancements_file)) {
+            $enhancements_content = file_get_contents($enhancements_file);
+            $inline_enhancements = '<script>' . $enhancements_content . '</script>';
+            $enhancements_injected = true;
+        }
+    }
 
     // If a post ID was passed, get post info from WordPress.
     if(!empty($post_id)):
@@ -228,7 +232,7 @@ function type_3_player($atts) {
         $min_height = '75px';
     endif;
 
-    // Inject CSS inline (only once per page, even if multiple players)
+    // Inject CSS and JS inline (only once per page, even if multiple players)
     static $css_injected = false;
     $inline_css = '';
     if (!$css_injected) {
@@ -240,7 +244,7 @@ function type_3_player($atts) {
         }
     }
 
-    $html = $inline_css . '<div style="width: 100%; min-height: ' . esc_attr($min_height) . '; clear: both;" class="' . esc_attr($class) . '">';
+    $html = $inline_css . $inline_enhancements . '<div style="width: 100%; min-height: ' . esc_attr($min_height) . '; clear: both;" class="' . esc_attr($class) . '">';
 
     // Check if we should show podcast subscribe buttons. The t3a_should_show_podcast_subscribe() function
     // will use the global post if $post_id is not provided, so we can call it directly.

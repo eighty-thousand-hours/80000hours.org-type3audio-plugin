@@ -50,29 +50,40 @@ function t3a_enqueue_manage_narration_metabox_assets($hook_suffix) {
         return;
     }
 
-    wp_enqueue_script(
-        't3a-manage-narration',
-        T3A_PLUGIN_URL . '/assets/js/manage-narration.js',
-        array('wp-date'),
-        T3A_VERSION . '.' . T3A_80K_ASSET_REV,
-        true
-    );
+    // We still need wp-date for the date formatting functionality
+    wp_enqueue_script('wp-date');
 
+    // Inline the manage-narration.js script instead of enqueueing it
     $date_format = get_option('date_format', 'F j, Y');
     $time_format = get_option('time_format', 'g:i a');
-
     $strings = t3a_get_manage_narration_strings();
 
-    wp_localize_script(
-        't3a-manage-narration',
-        't3aManageNarration',
-        array(
-            'strings' => $strings,
-            'formats' => array(
-                'dateTime' => trim($date_format . ' ' . $time_format),
-            ),
-        )
+    // Output the localized data as inline script
+    $localized_data = array(
+        'strings' => $strings,
+        'formats' => array(
+            'dateTime' => trim($date_format . ' ' . $time_format),
+        ),
     );
+
+    $script_file = T3A_PLUGIN_PATH . 'assets/js/manage-narration.js';
+    if (is_readable($script_file)) {
+        $script_content = file_get_contents($script_file);
+        if ($script_content !== false) {
+            // Minify: remove comments and excessive whitespace
+            $script_content = preg_replace('/\/\*[\s\S]*?\*\//', '', $script_content);  // Remove /* */ comments
+            $script_content = preg_replace('/^\s*\/\/.*$/m', '', $script_content);      // Remove // comments
+            $script_content = preg_replace('/\s+/', ' ', $script_content);              // Collapse whitespace
+
+            if ($script_content !== null) {
+                // Output the localized data followed by the script
+                echo '<script>';
+                echo 'window.t3aManageNarration = ' . wp_json_encode($localized_data) . ';';
+                echo ' ' . trim($script_content);
+                echo '</script>';
+            }
+        }
+    }
 }
 
 /**

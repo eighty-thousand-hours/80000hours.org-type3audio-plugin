@@ -187,7 +187,6 @@ function type_3_player($atts) {
     );
 
     // Inline player enhancements script (analytics, scroll behavior, heading filters)
-    // Always inject to avoid issues with WordPress calling shortcode multiple times during rendering
     $inline_enhancements = '';
     $enhancements_file = T3A_PLUGIN_PATH . 'assets/js/player-enhancements.js';
     if (is_readable($enhancements_file)) {
@@ -238,7 +237,6 @@ function type_3_player($atts) {
     endif;
 
     // Inject CSS inline
-    // Always inject to avoid issues with WordPress calling shortcode multiple times during rendering
     $inline_css = '';
     $css_file = T3A_PLUGIN_PATH . 'assets/css/player.css';
     if (is_readable($css_file)) {
@@ -311,7 +309,6 @@ function type_3_player($atts) {
 
     if (!t3a_is_hardcoded_mp3_url($atts)) {
         if (!t3a_is_post_published()) {
-            // Preserve inline CSS/JS even when showing placeholder message
             $placeholder = do_shortcode("[well margin='!tw--my-2']The audio player will display here when this post is published on the live site.[/well]");
             return $inline_css . $inline_enhancements . $placeholder;
         }

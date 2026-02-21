@@ -54,7 +54,6 @@ function t3a_enqueue_manage_narration_metabox_assets($hook_suffix) {
     wp_enqueue_script('wp-date');
 
     // Inline the manage-narration.js script instead of enqueueing it
-    // Always inject to avoid issues with WordPress calling hook multiple times during rendering
     $date_format = get_option('date_format', 'F j, Y');
     $time_format = get_option('time_format', 'g:i a');
     $strings = t3a_get_manage_narration_strings();
